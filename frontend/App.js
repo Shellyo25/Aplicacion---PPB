@@ -1,25 +1,125 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar';
 import Bienvenida from './pantallas/Bienvenida';
 import Registro from './pantallas/Registro';
 import InicioSesion from './pantallas/InicioSesion';
+import Inicio from './pantallas/Inicio';
 import menu from './pantallas/menu';
 import Listalecciones from './pantallas/Listalecciones';
 import ContenidoLecciones from './pantallas/ContenidoLecciones';
+import Ejercicios from './pantallas/Ejercicios';
+import Estadisticas from './pantallas/Estadisticas';
+import Configuracion from './pantallas/Configuracion';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Bienvenida">
-        <Stack.Screen name="Bienvenida" component={Bienvenida} options={{ headerShown: false }} />
-        <Stack.Screen name="Registro" component={Registro} />
-        <Stack.Screen name="InicioSesion" component={InicioSesion} />
-        <Stack.Screen name="menu" component={menu} />
-        <Stack.Screen name="Listalecciones" component={Listalecciones} />
-        <Stack.Screen name="ContenidoLecciones" component={ContenidoLecciones} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <StatusBar style="auto" />
+      <NavigationContainer>
+        <Stack.Navigator 
+          initialRouteName="Bienvenida"
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: '#f8f9fa',
+            },
+            headerTintColor: '#1a1a1a',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 18,
+            },
+            headerShadowVisible: false,
+          }}
+        >
+          <Stack.Screen 
+            name="Bienvenida" 
+            component={Bienvenida} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Registro" 
+            component={Registro}
+            options={{ 
+              title: 'Crear cuenta',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="InicioSesion" 
+            component={InicioSesion}
+            options={{ 
+              title: 'Iniciar sesión',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="Inicio" 
+            component={Inicio}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen 
+            name="menu" 
+            component={menu}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen 
+            name="Listalecciones" 
+            component={Listalecciones}
+            options={{ 
+              title: 'Lecciones',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="ContenidoLecciones" 
+            component={ContenidoLecciones}
+            options={{ 
+              title: 'Contenido',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="Ejercicios" 
+            component={Ejercicios}
+            options={{ 
+              title: 'Ejercicios',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="Estadisticas" 
+            component={Estadisticas}
+            options={{ 
+              title: 'Estadísticas',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="Configuracion" 
+            component={Configuracion}
+            options={{ 
+              title: 'Configuración',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 }

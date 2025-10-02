@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'http://192.168.1.13:3000/api';
 
-export default function Menu({ navigation }) {
+export default function Inicio({ navigation }) {
   const [userData, setUserData] = useState(null);
   const [estadisticas, setEstadisticas] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,8 +35,6 @@ export default function Menu({ navigation }) {
           const stats = await response.json();
           setEstadisticas(stats);
         }
-      } else {
-        navigation.navigate('InicioSesion');
       }
     } catch (error) {
       console.error('Error al cargar datos:', error);
@@ -74,7 +72,7 @@ export default function Menu({ navigation }) {
 
       <View style={estilos.saludo}>
         <Text style={estilos.titulo}>¡Hola, {userData?.nombre}!</Text>
-        <Text style={estilos.subtitulo}>¿Qué deseas hacer hoy?</Text>
+        <Text style={estilos.subtitulo}>¿Qué deseas aprender hoy?</Text>
       </View>
 
       {estadisticas && (
@@ -95,33 +93,6 @@ export default function Menu({ navigation }) {
         </View>
       )}
 
-      <View style={estilos.opciones}>
-        <BotonMenu 
-          icono="graduation-cap" 
-          texto="Lecciones" 
-          descripcion="Aprende lengua de señas paso a paso"
-          onPress={() => navigation.navigate('Listalecciones')} 
-        />
-        <BotonMenu 
-          icono="pencil" 
-          texto="Ejercicios" 
-          descripcion="Practica con actividades interactivas"
-          onPress={() => navigation.navigate('Ejercicios')} 
-        />
-        <BotonMenu 
-          icono="bar-chart" 
-          texto="Estadísticas" 
-          descripcion="Ve tu progreso y logros"
-          onPress={() => navigation.navigate('Estadisticas')} 
-        />
-        <BotonMenu 
-          icono="cog" 
-          texto="Configuración" 
-          descripcion="Ajustes de la aplicación"
-          onPress={() => navigation.navigate('Configuracion')} 
-        />
-      </View>
-
       <View style={estilos.recomendaciones}>
         <Text style={estilos.tituloSeccion}>Recomendaciones</Text>
         <TouchableOpacity 
@@ -129,35 +100,47 @@ export default function Menu({ navigation }) {
           onPress={() => navigation.navigate('Listalecciones')}
         >
           <FontAwesome name="book" size={20} color="#fff" style={estilos.iconoBoton} />
-          <View style={estilos.recomendacionTexto}>
-            <Text style={estilos.recomendacionTitulo}>Continúa aprendiendo</Text>
-            <Text style={estilos.recomendacionDescripcion}>
-              {estadisticas?.leccionesCompletadas > 0 
-                ? `Tienes ${estadisticas.leccionesCompletadas} lecciones completadas`
-                : 'Comienza tu primera lección'
-              }
-            </Text>
-          </View>
+          <Text style={estilos.textoBoton}>Continuar aprendiendo</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={estilos.botonRecomendacion}
+          onPress={() => navigation.navigate('Estadisticas')}
+        >
+          <FontAwesome name="bar-chart" size={20} color="#fff" style={estilos.iconoBoton} />
+          <Text style={estilos.textoBoton}>Ver estadísticas detalladas</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
-  );
-}
 
-function BotonMenu({ icono, texto, descripcion, onPress }) {
-  return (
-    <TouchableOpacity style={estilos.boton} onPress={onPress}>
-      <View style={estilos.botonContenido}>
-        <View style={estilos.botonIcono}>
-          <FontAwesome name={icono} size={24} color="#023047" />
+      <View style={estilos.accionesRapidas}>
+        <Text style={estilos.tituloSeccion}>Acceso Rápido</Text>
+        <View style={estilos.botonesContainer}>
+          <TouchableOpacity 
+            style={estilos.botonAccion}
+            onPress={() => navigation.navigate('Listalecciones')}
+          >
+            <FontAwesome name="graduation-cap" size={24} color="#023047" />
+            <Text style={estilos.textoAccion}>Lecciones</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={estilos.botonAccion}
+            onPress={() => navigation.navigate('Ejercicios')}
+          >
+            <FontAwesome name="pencil" size={24} color="#023047" />
+            <Text style={estilos.textoAccion}>Ejercicios</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={estilos.botonAccion}
+            onPress={() => navigation.navigate('Estadisticas')}
+          >
+            <FontAwesome name="chart-line" size={24} color="#023047" />
+            <Text style={estilos.textoAccion}>Progreso</Text>
+          </TouchableOpacity>
         </View>
-        <View style={estilos.botonTexto}>
-          <Text style={estilos.textoBoton}>{texto}</Text>
-          <Text style={estilos.descripcionBoton}>{descripcion}</Text>
-        </View>
-        <FontAwesome name="chevron-right" size={16} color="#ccc" />
       </View>
-    </TouchableOpacity>
+    </ScrollView>
   );
 }
 
@@ -241,51 +224,9 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     marginTop: 5,
   },
-  opciones: {
-    padding: 20,
-    paddingTop: 0,
-  },
-  boton: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  botonContenido: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  botonIcono: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  botonTexto: {
-    flex: 1,
-  },
-  textoBoton: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#023047',
-    marginBottom: 5,
-  },
-  descripcionBoton: {
-    fontSize: 14,
-    color: '#666',
-  },
   recomendaciones: {
     padding: 20,
     paddingTop: 0,
-    paddingBottom: 40,
   },
   botonRecomendacion: {
     flexDirection: 'row',
@@ -293,23 +234,43 @@ const estilos = StyleSheet.create({
     backgroundColor: '#fb8500',
     padding: 15,
     borderRadius: 8,
+    marginBottom: 10,
   },
   iconoBoton: {
-    marginRight: 15,
+    marginRight: 10,
   },
-  recomendacionTexto: {
-    flex: 1,
-  },
-  recomendacionTitulo: {
+  textoBoton: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-    marginBottom: 2,
   },
-  recomendacionDescripcion: {
-    color: '#fff',
-    fontSize: 14,
-    opacity: 0.9,
+  accionesRapidas: {
+    padding: 20,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
+  botonesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  botonAccion: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  textoAccion: {
+    fontSize: 12,
+    color: '#023047',
+    marginTop: 8,
+    fontWeight: 'bold',
   },
   textoCarga: {
     marginTop: 10,
