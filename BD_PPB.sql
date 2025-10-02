@@ -5,6 +5,7 @@ use lensegua;
 CREATE TABLE Tbl_usuarios (
     Pk_ID_usuario INT PRIMARY KEY AUTO_INCREMENT,
     Nombre VARCHAR(100),
+    Apellido VARCHAR(100),
     Usuario VARCHAR(50) UNIQUE,
     Correo VARCHAR(100) UNIQUE,
     Contrasena VARCHAR(255),
@@ -66,7 +67,6 @@ CREATE TABLE Tbl_Progreso (
     FOREIGN KEY (Fk_leccion) REFERENCES Tbl_lecciones(Pk_ID_leccion)
 );
 
--- Insertar lecciones de ejemplo
 INSERT INTO Tbl_lecciones (Nombre, Descripcion, Nivel, Orden, Imagen) VALUES
 ('Abecedario', 'Aprende las letras del alfabeto en lengua de señas guatemalteca', 1, 1, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/abecedario.png'),
 ('Números', 'Números del 0 al 10 en lengua de señas', 1, 2, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numeros.png'),
@@ -78,7 +78,7 @@ INSERT INTO Tbl_lecciones (Nombre, Descripcion, Nivel, Orden, Imagen) VALUES
 ('Verduras', 'Nombres de verduras en lengua de señas', 1, 8, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verduras.png'),
 ('Días de la semana', 'Los días de la semana en lengua de señas', 1, 9, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dias.png');
 
--- Insertar contenido 
+
 INSERT INTO Tbl_contenido (Descripcion, Fk_ID_leccion, Imagen, Tipo) VALUES
 ('Letra A', 1, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_a.png', 'imagen'),
 ('Letra B', 1, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_b.png', 'imagen'),
@@ -86,7 +86,7 @@ INSERT INTO Tbl_contenido (Descripcion, Fk_ID_leccion, Imagen, Tipo) VALUES
 ('Letra D', 1, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_d.png', 'imagen'),
 ('Letra E', 1, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_e.png', 'imagen');
 
--- Insertar contenido 
+
 INSERT INTO Tbl_contenido (Descripcion, Fk_ID_leccion, Imagen, Tipo) VALUES
 ('Número 0', 2, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_0.png', 'imagen'),
 ('Número 1', 2, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_1.png', 'imagen'),
@@ -95,7 +95,6 @@ INSERT INTO Tbl_contenido (Descripcion, Fk_ID_leccion, Imagen, Tipo) VALUES
 ('Número 4', 2, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_4.png', 'imagen'),
 ('Número 5', 2, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_5.png', 'imagen');
 
--- Insertar tipos de lección
 INSERT INTO Tbl_TipoLeccion (Descripcion, Preguntas, Puntuacion) VALUES
 ('Opción Múltiple', 'Selecciona la respuesta correcta', 10.0),
 ('Asociación', 'Asocia la imagen con la seña correcta', 15.0),
