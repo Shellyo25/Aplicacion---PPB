@@ -16,7 +16,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
-const API_BASE_URL = 'http://192.168.1.13:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 export default function InicioSesion({ navigation }) {
   const [usuario, setUsuario] = useState('');

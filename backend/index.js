@@ -7,7 +7,6 @@ const mysql = require('mysql2/promise');
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const { google } = require('googleapis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +26,7 @@ app.use(limiter);
 // Configuración de la base de datos
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'root',
   database: process.env.DB_NAME || 'lensegua',
@@ -38,34 +38,30 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
-// Configuración OAuth2 para Gmail
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GMAIL_CLIENT_ID,
-  process.env.GMAIL_CLIENT_SECRET,
-  'https://developers.google.com/oauthplayground'
-);
+// Probar conexión a la base de datos
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('✅ Base de datos conectada');
+    connection.release();
+  } catch (err) {
+    console.error('❌ Error de conexión a la base de datos');
+  }
+})();
 
-if (process.env.GMAIL_REFRESH_TOKEN) {
-  oauth2Client.setCredentials({
-    refresh_token: process.env.GMAIL_REFRESH_TOKEN
-  });
-}
-
-// Configuración de nodemailer con OAuth2
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
+// Configuración de nodemailer (opcional)
+let transporter = null;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+  transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: process.env.SMTP_PORT || 587,
+    secure: false,
   auth: {
-    type: 'OAuth2',
-    user: process.env.EMAIL_USER || 'tu-correo@gmail.com',
-    clientId: process.env.GMAIL_CLIENT_ID,
-    clientSecret: process.env.GMAIL_CLIENT_SECRET,
-    refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-    accessToken: async () => {
-      const { token } = await oauth2Client.getAccessToken();
-      return token;
-    }
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
   }
 });
+}
 
 // Middleware de autenticación
 const authenticateToken = (req, res, next) => {
@@ -95,167 +91,15 @@ const validatePassword = (password) => {
   return password.length >= 8 && /[A-Za-z]/.test(password) && /[0-9]/.test(password);
 };
 
-// Función para generar HTML del correo de confirmación
+// Función para generar HTML del correo de confirmación (simplificada)
 const generarHTMLConfirmacion = (nombre) => {
   return `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>¡Bienvenido a LENSEGUA!</title>
-        <style>
-            body {
-                font-family: 'Arial', sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f4f4f4;
-            }
-            .container {
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #ffffff;
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-            .header {
-                background: linear-gradient(135deg, #8ecae6, #219ebc);
-                padding: 30px 20px;
-                text-align: center;
-            }
-            .logo {
-                width: 80px;
-                height: 80px;
-                margin: 0 auto 20px;
-                background-color: #fff;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 24px;
-                font-weight: bold;
-                color: #023047;
-            }
-            .title {
-                color: #023047;
-                font-size: 28px;
-                font-weight: bold;
-                margin: 0;
-            }
-            .content {
-                padding: 40px 30px;
-                text-align: center;
-            }
-            .welcome-text {
-                font-size: 18px;
-                color: #023047;
-                margin-bottom: 20px;
-                line-height: 1.6;
-            }
-            .success-message {
-                background-color: #e8f5e8;
-                border: 2px solid #4CAF50;
-                border-radius: 8px;
-                padding: 20px;
-                margin: 20px 0;
-            }
-            .success-icon {
-                font-size: 48px;
-                color: #4CAF50;
-                margin-bottom: 10px;
-            }
-            .features {
-                text-align: left;
-                margin: 30px 0;
-            }
-            .feature {
-                display: flex;
-                align-items: center;
-                margin: 15px 0;
-                font-size: 16px;
-                color: #023047;
-            }
-            .feature-icon {
-                width: 30px;
-                height: 30px;
-                background-color: #fb8500;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 15px;
-                color: white;
-                font-weight: bold;
-            }
-            .footer {
-                background-color: #023047;
-                color: white;
-                padding: 20px;
-                text-align: center;
-                font-size: 14px;
-            }
-            .button {
-                display: inline-block;
-                background-color: #fb8500;
-                color: white;
-                padding: 12px 30px;
-                text-decoration: none;
-                border-radius: 25px;
-                font-weight: bold;
-                margin: 20px 0;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <div class="logo">L</div>
-                <h1 class="title">¡Bienvenido a LENSEGUA!</h1>
-            </div>
-            
-            <div class="content">
-                <div class="success-message">
-                    <div class="success-icon">✓</div>
-                    <h2 style="color: #4CAF50; margin: 0;">¡Usuario creado exitosamente!</h2>
-                </div>
-                
-                <p class="welcome-text">
-                    Hola <strong>${nombre}</strong>,<br><br>
-                    ¡Tu cuenta ha sido creada exitosamente! Ahora puedes comenzar tu viaje de aprendizaje de la lengua de señas guatemalteca.
-                </p>
-                
-                <div class="features">
-                    <div class="feature">
-                        <div class="feature-icon">1</div>
-                        <span>Lecciones interactivas y divertidas</span>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">2</div>
-                        <span>Ejercicios prácticos para reforzar tu aprendizaje</span>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">3</div>
-                        <span>Seguimiento de tu progreso personalizado</span>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">4</div>
-                        <span>Logros y certificaciones</span>
-                    </div>
-                </div>
-                
-                <p style="color: #023047; font-size: 16px; margin: 30px 0;">
-                    ¡Que tengas un excelente aprendizaje y bienvenido a nuestra comunidad!
-                </p>
-            </div>
-            
-            <div class="footer">
-                <p>© 2024 LENSEGUA - Aprendiendo lengua de señas guatemalteca</p>
-                <p>Si no creaste esta cuenta, puedes ignorar este correo.</p>
-            </div>
-        </div>
-    </body>
-    </html>
+    <h2>¡Bienvenido a LENSEGUA!</h2>
+    <p>Hola <strong>${nombre}</strong>,</p>
+    <p>¡Tu cuenta ha sido creada exitosamente! Ahora puedes comenzar tu viaje de aprendizaje de la lengua de señas guatemalteca.</p>
+    <p>¡Que tengas un excelente aprendizaje!</p>
+    <br>
+    <p>El equipo de LENSEGUA</p>
   `;
 };
 
@@ -311,13 +155,14 @@ app.post('/api/registro', async (req, res) => {
 
     // Insertar usuario
     const [result] = await pool.execute(
-      'INSERT INTO Tbl_usuarios (Nombre, Usuario, Correo, Contrasena, Estado) VALUES (?, ?, ?, ?, ?)',
-      [`${nombre} ${apellido}`, usuario, correo, hashedPassword, 'activo']
+      'INSERT INTO Tbl_usuarios (Nombre, Apellido, Usuario, Correo, Contrasena, Estado) VALUES (?, ?, ?, ?, ?, ?)',
+      [nombre, apellido, usuario, correo, hashedPassword, 'activo']
     );
 
-    // Enviar correo de confirmación
+    // Enviar correo de confirmación (opcional)
+    if (transporter) {
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'tu-correo@gmail.com',
+        from: process.env.EMAIL_USER,
       to: correo,
       subject: '¡Bienvenido a LENSEGUA! - Usuario creado exitosamente',
       html: generarHTMLConfirmacion(`${nombre} ${apellido}`)
@@ -330,6 +175,9 @@ app.post('/api/registro', async (req, res) => {
         console.log('Correo enviado exitosamente');
       }
     });
+    } else {
+      console.log('Correo no configurado - usuario registrado sin notificación por email');
+    }
 
     res.status(201).json({ 
       message: 'Usuario registrado exitosamente',
@@ -338,7 +186,19 @@ app.post('/api/registro', async (req, res) => {
 
   } catch (error) {
     console.error('Error en registro:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    
+    // Errores específicos de base de datos
+    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      return res.status(500).json({ error: 'Error de acceso a la base de datos. Verifica las credenciales.' });
+    }
+    if (error.code === 'ECONNREFUSED') {
+      return res.status(500).json({ error: 'No se puede conectar a la base de datos. Verifica que MySQL esté ejecutándose.' });
+    }
+    if (error.code === 'ER_BAD_DB_ERROR') {
+      return res.status(500).json({ error: 'La base de datos no existe. Verifica que la base de datos "lensegua" esté creada.' });
+    }
+    
+    res.status(500).json({ error: 'Error interno del servidor: ' + error.message });
   }
 });
 
@@ -558,8 +418,9 @@ app.post('/api/recuperar-password', async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    if (transporter) {
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'tu-correo@gmail.com',
+        from: process.env.EMAIL_USER,
       to: correo,
       subject: 'Recuperación de contraseña - LENSEGUA',
       html: `
@@ -583,6 +444,9 @@ app.post('/api/recuperar-password', async (req, res) => {
         res.json({ message: 'Correo de recuperación enviado' });
       }
     });
+    } else {
+      res.status(503).json({ error: 'Servicio de correo no disponible' });
+    }
 
   } catch (error) {
     console.error('Error en recuperación:', error);
@@ -591,5 +455,5 @@ app.post('/api/recuperar-password', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor LENSEGUA corriendo en el puerto ${PORT}`);
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });

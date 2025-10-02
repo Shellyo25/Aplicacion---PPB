@@ -74,7 +74,7 @@ Una aplicación móvil desarrollada con React Native y Expo para enseñar lengua
 - **MySQL** - Base de datos
 - **JWT** - Autenticación
 - **bcryptjs** - Encriptación de contraseñas
-- **Nodemailer** - Envío de correos
+- **Nodemailer** - Envío de correos (configuración simplificada)
 - **Helmet** - Seguridad
 - **Rate Limiting** - Protección contra spam
 
@@ -103,9 +103,8 @@ mysql -u root -p < BD_PPB.sql
 cd backend
 npm install
 
-# Crear archivo .env
-cp .env.example .env
-# Editar .env con tus credenciales de base de datos y correo
+# Crear archivo .env con las variables necesarias
+# Ver CONFIGURACION.md para más detalles
 ```
 
 ### 4. Configurar el Frontend

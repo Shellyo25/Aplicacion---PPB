@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import Bienvenida from './pantallas/Bienvenida';
 import Registro from './pantallas/Registro';
 import InicioSesion from './pantallas/InicioSesion';
-import Inicio from './pantallas/Inicio';
 import menu from './pantallas/menu';
 import Listalecciones from './pantallas/Listalecciones';
 import ContenidoLecciones from './pantallas/ContenidoLecciones';
@@ -57,11 +56,6 @@ export default function App() {
               headerTintColor: '#1a1a1a',
               headerTitleStyle: { fontWeight: 'bold' }
             }}
-          />
-          <Stack.Screen 
-            name="Inicio" 
-            component={Inicio}
-            options={{ headerShown: false }}
           />
           <Stack.Screen 
             name="menu" 

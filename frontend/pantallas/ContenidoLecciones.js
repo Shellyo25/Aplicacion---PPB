@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIn
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://192.168.1.13:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 export default function ContenidoLecciones({ route, navigation }) {
   const { leccion } = route.params;
