@@ -145,9 +145,13 @@ export default function Registro({ navigation }) {
         limpiarFormulario();
         
         // Mostrar mensaje de éxito más claro
+        const emailMessage = data.emailSent ? 
+          '\n📧 Se ha enviado un correo de bienvenida a tu email con más información.' : 
+          '\n⚠️ El correo de bienvenida no pudo ser enviado.';
+        
         Alert.alert(
           '🎉 ¡Usuario Creado Exitosamente!',
-          `¡Hola ${nombre}! Tu cuenta ha sido creada correctamente.\n\n✅ Usuario: ${nombreUsuario}\n✅ Correo: ${correo}\n\nAhora puedes iniciar sesión con tus credenciales.`,
+          `¡Hola ${nombre}! Tu cuenta ha sido creada correctamente.\n\n✅ Usuario: ${nombreUsuario}\n✅ Correo: ${correo}${emailMessage}\n\nAhora puedes iniciar sesión con tus credenciales.`,
           [
             {
               text: 'Iniciar Sesión',

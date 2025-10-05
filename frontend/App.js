@@ -10,6 +10,7 @@ import ContenidoLecciones from './pantallas/ContenidoLecciones';
 import Ejercicios from './pantallas/Ejercicios';
 import Estadisticas from './pantallas/Estadisticas';
 import Configuracion from './pantallas/Configuracion';
+import Administrador from './pantallas/Administrador';
 
 const Stack = createNativeStackNavigator();
 
@@ -109,6 +110,16 @@ export default function App() {
               title: 'Configuración',
               headerStyle: { backgroundColor: '#f8f9fa' },
               headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="Administrador" 
+            component={Administrador}
+            options={{ 
+              title: 'Panel de Administración',
+              headerStyle: { backgroundColor: '#023047' },
+              headerTintColor: '#fff',
               headerTitleStyle: { fontWeight: 'bold' }
             }}
           />

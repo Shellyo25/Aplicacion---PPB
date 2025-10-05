@@ -120,6 +120,14 @@ export default function Menu({ navigation }) {
           descripcion="Ajustes de la aplicación"
           onPress={() => navigation.navigate('Configuracion')} 
         />
+        {userData?.rol === 'administrador' && (
+          <BotonMenu 
+            icono="cogs" 
+            texto="Administración" 
+            descripcion="Panel de administración del sistema"
+            onPress={() => navigation.navigate('Administrador')} 
+          />
+        )}
       </View>
 
       <View style={estilos.recomendaciones}>

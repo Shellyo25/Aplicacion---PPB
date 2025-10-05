@@ -56,8 +56,8 @@ export default function Configuracion({ navigation }) {
       if (userDataString) {
         const user = JSON.parse(userDataString);
         setUserData(user);
-        // Verificar si es admin (puedes cambiar esta lógica)
-        setEsAdmin(user.usuario === 'admin' || user.correo === 'admin@lensegua.com');
+        // Verificar si es admin usando el rol
+        setEsAdmin(user.rol === 'administrador');
       }
     } catch (error) {
       console.error('Error al cargar datos del usuario:', error);
@@ -122,8 +122,35 @@ export default function Configuracion({ navigation }) {
     );
   };
 
-  const exportarDatos = () => {
-    Alert.alert('Exportar Datos', 'Esta función te permitirá descargar tu progreso de aprendizaje');
+  const exportarDatos = async () => {
+    try {
+      // Obtener datos del usuario y progreso
+      const userDataString = await AsyncStorage.getItem('userData');
+      const token = await AsyncStorage.getItem('token');
+      
+      if (userDataString && token) {
+        const user = JSON.parse(userDataString);
+        
+        // Crear datos para exportar
+        const datosExportar = {
+          usuario: user.nombre,
+          correo: user.correo,
+          fechaExportacion: new Date().toISOString(),
+          configuraciones: configuraciones,
+          version: '1.0.0'
+        };
+        
+        // Mostrar datos en un alert (en una app real se podría guardar como archivo)
+        Alert.alert(
+          'Datos Exportados', 
+          `Usuario: ${user.nombre}\nCorreo: ${user.correo}\nConfiguraciones guardadas: ${Object.keys(configuraciones).length}\n\nLos datos se han preparado para exportar.`,
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Error al exportar datos:', error);
+      Alert.alert('Error', 'No se pudieron exportar los datos');
+    }
   };
 
   const contactarSoporte = () => {
@@ -134,6 +161,35 @@ export default function Configuracion({ navigation }) {
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Email', onPress: () => Alert.alert('Email', 'soporte@lensegua.com') },
         { text: 'WhatsApp', onPress: () => Alert.alert('WhatsApp', '+502 1234-5678') }
+      ]
+    );
+  };
+
+  const limpiarDatos = () => {
+    Alert.alert(
+      'Limpiar Datos de la App',
+      'Esto eliminará todas las configuraciones guardadas y reiniciará la aplicación. ¿Continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Limpiar', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('configuraciones');
+              setConfiguraciones({
+                notificaciones: true,
+                sonidos: true,
+                modoOscuro: false,
+                idioma: 'es',
+                recordarSesion: true
+              });
+              Alert.alert('Éxito', 'Los datos han sido limpiados');
+            } catch (error) {
+              Alert.alert('Error', 'No se pudieron limpiar los datos');
+            }
+          }
+        }
       ]
     );
   };
@@ -191,11 +247,12 @@ export default function Configuracion({ navigation }) {
           style={estilos.avatar}
         />
         <View style={estilos.perfilInfo}>
-          <Text style={estilos.nombreUsuario}>{userData?.nombre || 'Usuario'}</Text>
+          <Text style={estilos.nombreUsuario}>{userData?.nombre || 'Usuario'} {userData?.apellido || ''}</Text>
           <Text style={estilos.correoUsuario}>{userData?.correo || 'usuario@ejemplo.com'}</Text>
+          <Text style={estilos.usuarioText}>@{userData?.usuario || 'usuario'}</Text>
           {esAdmin && (
             <View style={estilos.adminBadge}>
-              <FontAwesome name="crown" size={12} color="#ffc107" />
+              <FontAwesome name="shield" size={12} color="#ffc107" />
               <Text style={estilos.adminText}>Administrador</Text>
             </View>
           )}
@@ -312,7 +369,7 @@ export default function Configuracion({ navigation }) {
             titulo="Gestionar Usuarios"
             descripcion="Ver y administrar usuarios"
             tipo="navegacion"
-            onPress={() => Alert.alert('Admin', 'Panel de usuarios - Próximamente')}
+            onPress={() => navigation.navigate('Administrador')}
             color="#dc3545"
           />
           
@@ -321,7 +378,7 @@ export default function Configuracion({ navigation }) {
             titulo="Gestionar Lecciones"
             descripcion="Crear y editar lecciones"
             tipo="navegacion"
-            onPress={() => Alert.alert('Admin', 'Editor de lecciones - Próximamente')}
+            onPress={() => Alert.alert('Gestionar Lecciones', 'Esta función estará disponible próximamente')}
             color="#e83e8c"
           />
           
@@ -330,7 +387,7 @@ export default function Configuracion({ navigation }) {
             titulo="Estadísticas Generales"
             descripcion="Ver estadísticas de todos los usuarios"
             tipo="navegacion"
-            onPress={() => Alert.alert('Admin', 'Dashboard admin - Próximamente')}
+            onPress={() => navigation.navigate('Administrador')}
             color="#6f42c1"
           />
         </Animated.View>
@@ -373,6 +430,15 @@ export default function Configuracion({ navigation }) {
           tipo="navegacion"
           onPress={() => Alert.alert('Acerca de LENSEGUA', 'Versión 1.0.0\n\nAplicación para aprender Lengua de Señas Guatemalteca\n\nDesarrollado con ❤️ para la comunidad')}
           color="#6c757d"
+        />
+        
+        <ConfiguracionItem
+          icono="refresh"
+          titulo="Limpiar Datos"
+          descripcion="Reiniciar configuraciones de la app"
+          tipo="navegacion"
+          onPress={limpiarDatos}
+          color="#ffc107"
         />
       </Animated.View>
 
@@ -443,6 +509,11 @@ const estilos = StyleSheet.create({
   correoUsuario: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 4,
+  },
+  usuarioText: {
+    fontSize: 12,
+    color: '#999',
     marginBottom: 8,
   },
   adminBadge: {
