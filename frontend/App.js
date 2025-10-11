@@ -8,6 +8,7 @@ import menu from './pantallas/menu';
 import Listalecciones from './pantallas/Listalecciones';
 import ContenidoLecciones from './pantallas/ContenidoLecciones';
 import Ejercicios from './pantallas/Ejercicios';
+import EjerciciosLeccion from './pantallas/EjerciciosLeccion';
 import Estadisticas from './pantallas/Estadisticas';
 import Configuracion from './pantallas/Configuracion';
 import Administrador from './pantallas/Administrador';
@@ -88,6 +89,16 @@ export default function App() {
             component={Ejercicios}
             options={{ 
               title: 'Ejercicios',
+              headerStyle: { backgroundColor: '#f8f9fa' },
+              headerTintColor: '#1a1a1a',
+              headerTitleStyle: { fontWeight: 'bold' }
+            }}
+          />
+          <Stack.Screen 
+            name="EjerciciosLeccion" 
+            component={EjerciciosLeccion}
+            options={{ 
+              title: 'Ejercicios de Lección',
               headerStyle: { backgroundColor: '#f8f9fa' },
               headerTintColor: '#1a1a1a',
               headerTitleStyle: { fontWeight: 'bold' }

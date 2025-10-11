@@ -103,12 +103,6 @@ export default function Menu({ navigation }) {
           onPress={() => navigation.navigate('Listalecciones')} 
         />
         <BotonMenu 
-          icono="pencil" 
-          texto="Ejercicios" 
-          descripcion="Practica con actividades interactivas"
-          onPress={() => navigation.navigate('Ejercicios')} 
-        />
-        <BotonMenu 
           icono="bar-chart" 
           texto="Estadísticas" 
           descripcion="Ve tu progreso y logros"

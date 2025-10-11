@@ -536,6 +536,8 @@ app.get('/api/lecciones', authenticateToken, async (req, res) => {
       'SELECT Pk_ID_leccion, Nombre, Descripcion FROM Tbl_lecciones ORDER BY Pk_ID_leccion'
     );
 
+    console.log('Lecciones en BD:', lecciones.map(l => `${l.Pk_ID_leccion}: ${l.Nombre}`));
+
     const [progreso] = await pool.execute(
       'SELECT Fk_leccion, Porcen_Av FROM Tbl_Progreso WHERE Fk_ID_usuario = ?',
       [req.user.userId]
@@ -546,11 +548,19 @@ app.get('/api/lecciones', authenticateToken, async (req, res) => {
       progresoMap[p.Fk_leccion] = p.Porcen_Av;
     });
 
-    const leccionesConProgreso = lecciones.map(leccion => ({
-      ...leccion,
-      progreso: progresoMap[leccion.Pk_ID_leccion] || 0,
-      desbloqueada: leccion.Pk_ID_leccion === 1 || progresoMap[leccion.Pk_ID_leccion - 1] >= 80
-    }));
+    const leccionesConProgreso = lecciones.map(leccion => {
+      const progresoActual = progresoMap[leccion.Pk_ID_leccion] || 0;
+      const progresoAnterior = progresoMap[leccion.Pk_ID_leccion - 1] || 0;
+      const desbloqueada = leccion.Pk_ID_leccion === 1 || progresoAnterior >= 100;
+      
+      console.log(`Lección ${leccion.Pk_ID_leccion} (${leccion.Nombre}): progreso=${progresoActual}%, anterior=${progresoAnterior}%, desbloqueada=${desbloqueada}`);
+      
+      return {
+        ...leccion,
+        progreso: progresoActual,
+        desbloqueada: desbloqueada
+      };
+    });
 
     res.json({ lecciones: leccionesConProgreso });
   } catch (error) {
@@ -579,6 +589,8 @@ app.post('/api/progreso', authenticateToken, async (req, res) => {
   try {
     const { leccionId, porcentaje } = req.body;
 
+    console.log(`Guardando progreso: usuario=${req.user.userId}, leccion=${leccionId}, porcentaje=${porcentaje}%`);
+
     if (!leccionId || porcentaje < 0 || porcentaje > 100) {
       return res.status(400).json({ error: 'Datos de progreso inválidos' });
     }
@@ -588,16 +600,20 @@ app.post('/api/progreso', authenticateToken, async (req, res) => {
       [req.user.userId, leccionId]
     );
 
+    console.log(`Registro existente para lección ${leccionId}:`, existing.length > 0);
+
     if (existing.length > 0) {
       await pool.execute(
         'UPDATE Tbl_Progreso SET Porcen_Av = ? WHERE Fk_ID_usuario = ? AND Fk_leccion = ?',
         [porcentaje, req.user.userId, leccionId]
       );
+      console.log(`Progreso actualizado: ${porcentaje}% para lección ${leccionId}`);
     } else {
       await pool.execute(
         'INSERT INTO Tbl_Progreso (Fk_ID_usuario, Fk_leccion, Porcen_Av) VALUES (?, ?, ?)',
         [req.user.userId, leccionId, porcentaje]
       );
+      console.log(`Progreso insertado: ${porcentaje}% para lección ${leccionId}`);
     }
 
     res.json({ message: 'Progreso guardado exitosamente' });
@@ -619,7 +635,7 @@ app.get('/api/estadisticas', authenticateToken, async (req, res) => {
     );
 
     const totalLecciones = await pool.execute('SELECT COUNT(*) as total FROM Tbl_lecciones');
-    const leccionesCompletadas = progreso.filter(p => p.Porcen_Av >= 80).length;
+    const leccionesCompletadas = progreso.filter(p => p.Porcen_Av >= 100).length;
     const progresoGeneral = totalLecciones[0][0].total > 0 ? 
       (leccionesCompletadas / totalLecciones[0][0].total) * 100 : 0;
 

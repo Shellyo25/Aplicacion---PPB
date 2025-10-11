@@ -49,14 +49,31 @@ export default function ContenidoLecciones({ route, navigation }) {
   const siguienteContenido = () => {
     if (indiceActual < contenido.length - 1) {
       setIndiceActual(indiceActual + 1);
-    } else {
-      // Lección completada
-      marcarLeccionCompletada();
     }
+    // Cuando llegue al final, simplemente mostrar el botón "Completar lección"
   };
 
   const completarLeccion = () => {
-    marcarLeccionCompletada();
+    // Mostrar mensaje de finalización y opción de ir a ejercicios
+    Alert.alert(
+      '¡Contenido completado! 📚',
+      `Has terminado de revisar todo el contenido de "${leccion.Nombre}".\n\nAhora puedes practicar con los ejercicios para finalizar completamente esta lección.`,
+      [
+        {
+          text: 'Ir a ejercicios',
+          style: 'default',
+          onPress: () => navigation.navigate('EjerciciosLeccion', { 
+            leccionId: leccion.Pk_ID_leccion,
+            nombreLeccion: leccion.Nombre 
+          })
+        },
+        {
+          text: 'Volver al menú',
+          style: 'cancel',
+          onPress: () => navigation.navigate('Listalecciones')
+        }
+      ]
+    );
   };
 
   const contenidoAnterior = () => {
@@ -65,65 +82,6 @@ export default function ContenidoLecciones({ route, navigation }) {
     }
   };
 
-  const marcarLeccionCompletada = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const porcentaje = 100; // Lección completada al 100%
-      
-      await fetch(`${API_BASE_URL}/progreso`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          leccionId: leccion.Pk_ID_leccion,
-          porcentaje: porcentaje
-        }),
-      });
-
-      // Determinar la siguiente lección
-      const siguienteLeccionId = leccion.Pk_ID_leccion + 1;
-      const esUltimaLeccion = leccion.Pk_ID_leccion >= 27; // Última lección (Tiempo y Estaciones)
-
-      Alert.alert(
-        '¡Lección completada! 🎉',
-        `Has terminado "${leccion.Nombre}". ¡Excelente trabajo!\n\n¿Qué te gustaría hacer ahora?`,
-        [
-          {
-            text: 'Practicar ejercicios',
-            style: 'default',
-            onPress: () => navigation.navigate('Ejercicios')
-          },
-          {
-            text: esUltimaLeccion ? 'Ver todas las lecciones' : 'Pasar a la siguiente lección',
-            style: esUltimaLeccion ? 'cancel' : 'default',
-            onPress: () => {
-              if (esUltimaLeccion) {
-                navigation.navigate('Listalecciones');
-              } else {
-                // Navegar a la siguiente lección
-                navigation.navigate('ContenidoLecciones', { 
-                  leccion: {
-                    Pk_ID_leccion: siguienteLeccionId,
-                    Nombre: getNombreSiguienteLeccion(siguienteLeccionId),
-                    Descripcion: getDescripcionSiguienteLeccion(siguienteLeccionId)
-                  }
-                });
-              }
-            }
-          },
-          {
-            text: 'Volver al menú',
-            style: 'cancel',
-            onPress: () => navigation.navigate('Listalecciones')
-          }
-        ]
-      );
-    } catch (error) {
-      console.error('Error al marcar lección como completada:', error);
-    }
-  };
 
   // Función para obtener el nombre de la siguiente lección
   const getNombreSiguienteLeccion = (id) => {
@@ -192,7 +150,10 @@ export default function ContenidoLecciones({ route, navigation }) {
   };
 
   const irAEjercicios = () => {
-    navigation.navigate('Ejercicios');
+    navigation.navigate('EjerciciosLeccion', { 
+      leccionId: leccion.Pk_ID_leccion,
+      nombreLeccion: leccion.Nombre 
+    });
   };
 
   if (loading) {
@@ -301,11 +262,13 @@ export default function ContenidoLecciones({ route, navigation }) {
           )}
         </View>
 
-        {/* Botón de ejercicios */}
-        <TouchableOpacity style={estilos.botonEjercicios} onPress={irAEjercicios}>
-          <FontAwesome name="pencil" size={20} color="#fff" style={estilos.iconoBoton} />
-          <Text style={estilos.botonEjerciciosTexto}>Practicar con ejercicios</Text>
-        </TouchableOpacity>
+        {/* Botón de ejercicios - Solo visible después de completar la lección */}
+        {indiceActual >= contenido.length - 1 && (
+          <TouchableOpacity style={estilos.botonEjercicios} onPress={irAEjercicios}>
+            <FontAwesome name="pencil" size={20} color="#fff" style={estilos.iconoBoton} />
+            <Text style={estilos.botonEjerciciosTexto}>Practicar con ejercicios</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
