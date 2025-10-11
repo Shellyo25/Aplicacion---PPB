@@ -11,19 +11,16 @@ const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware de seguridad
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 100 // máximo 100 requests por IP
 });
 app.use(limiter);
 
-// Configuración de la base de datos
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
@@ -38,18 +35,16 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
-// Probar conexión a la base de datos
 (async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('✅ Base de datos conectada');
+    console.log('Base de datos conectada');
     connection.release();
   } catch (err) {
-    console.error('❌ Error de conexión a la base de datos');
+    console.error('Error de conexión a la base de datos');
   }
 })();
 
-// Configuración de nodemailer para Gmail
 let transporter = null;
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   transporter = nodemailer.createTransport({
@@ -65,24 +60,22 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     }
   });
   
-  // Verificar la configuración del transporter
   transporter.verify((error, success) => {
     if (error) {
-      console.error('❌ Error en configuración de correo:', error);
-      console.log('💡 Para solucionarlo:');
-      console.log('   1. Ve a https://myaccount.google.com/apppasswords');
-      console.log('   2. Genera una contraseña de aplicación para "Correo"');
-      console.log('   3. Actualiza EMAIL_PASS en el archivo .env');
-      console.log('   4. Reinicia el servidor');
+      console.error('Error en configuración de correo:', error);
+      console.log('Para solucionarlo:');
+      console.log('1. Ve a https://myaccount.google.com/apppasswords');
+      console.log('2. Genera una contraseña de aplicación para "Correo"');
+      console.log('3. Actualiza EMAIL_PASS en el archivo .env');
+      console.log('4. Reinicia el servidor');
     } else {
-      console.log('✅ Servidor de correo configurado correctamente');
+      console.log('Servidor de correo configurado correctamente');
     }
   });
 } else {
-  console.log('⚠️  Variables de correo no configuradas en .env');
+  console.log('Variables de correo no configuradas en .env');
 }
 
-// Middleware de autenticación
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -100,7 +93,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Middleware para verificar rol de administrador
 const requireAdmin = (req, res, next) => {
   if (req.user.rol !== 'administrador') {
     return res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador.' });
@@ -108,7 +100,6 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-// Validaciones
 const validateEmail = (email) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
@@ -118,7 +109,6 @@ const validatePassword = (password) => {
   return password.length >= 8 && /[A-Za-z]/.test(password) && /[0-9]/.test(password);
 };
 
-// Función para generar HTML del correo de confirmación con diseño creativo
 const generarHTMLConfirmacion = (nombre) => {
   return `
     <!DOCTYPE html>
@@ -298,16 +288,15 @@ const generarHTMLConfirmacion = (nombre) => {
     <body>
         <div class="container">
             <div class="header">
-                <div class="logo">🎉 LENSEGUA</div>
+                <div class="logo">LENSEGUA</div>
                 <div class="logo-subtitle">Aprende Lengua de Señas Guatemalteca</div>
             </div>
             
             <div class="content">
-                <div class="character-emoji">👋</div>
                 <h1 class="welcome-title">¡Bienvenido a LENSEGUA!</h1>
                 
                 <div class="success-badge">
-                    ✅ ¡Usuario creado exitosamente!
+                    ¡Usuario creado exitosamente!
                 </div>
                 
                 <div class="user-name">Hola, ${nombre}</div>
@@ -318,19 +307,19 @@ const generarHTMLConfirmacion = (nombre) => {
                 
                 <div class="features">
                     <div class="feature-item">
-                        <div class="feature-icon">📚</div>
+                        <div class="feature-icon">1</div>
                         <span>Accede a lecciones interactivas y divertidas</span>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">🎯</div>
+                        <div class="feature-icon">2</div>
                         <span>Practica con ejercicios personalizados</span>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">📊</div>
+                        <div class="feature-icon">3</div>
                         <span>Mantén un seguimiento de tu progreso</span>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">🏆</div>
+                        <div class="feature-icon">4</div>
                         <span>Desbloquea logros y certificaciones</span>
                     </div>
                 </div>
@@ -351,9 +340,9 @@ const generarHTMLConfirmacion = (nombre) => {
                 <p><strong>El equipo de LENSEGUA</strong></p>
                 <p>Haciendo la lengua de señas accesible para todos</p>
                 <div class="social-links">
-                    <a href="#">📱 App</a>
-                    <a href="#">🌐 Web</a>
-                    <a href="#">📧 Soporte</a>
+                    <a href="#">App</a>
+                    <a href="#">Web</a>
+                    <a href="#">Soporte</a>
                 </div>
                 <p style="margin-top: 20px; font-size: 12px; opacity: 0.8;">
                     Este correo fue enviado automáticamente. No respondas a este mensaje.
@@ -365,19 +354,14 @@ const generarHTMLConfirmacion = (nombre) => {
   `;
 };
 
-// Rutas
-
-// Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ message: 'Servidor LENSEGUA funcionando correctamente' });
 });
 
-// Registro de usuario
 app.post('/api/registro', async (req, res) => {
   try {
     const { nombre, apellido, usuario, correo, contrasena } = req.body;
 
-    // Validaciones
     if (!nombre || !apellido || !usuario || !correo || !contrasena) {
       return res.status(400).json({ error: 'Todos los campos son obligatorios' });
     }
@@ -392,7 +376,6 @@ app.post('/api/registro', async (req, res) => {
       });
     }
 
-    // Verificar si el correo ya existe
     const [existingEmail] = await pool.execute(
       'SELECT Pk_ID_usuario FROM Tbl_usuarios WHERE Correo = ?',
       [correo]
@@ -402,7 +385,6 @@ app.post('/api/registro', async (req, res) => {
       return res.status(400).json({ error: 'El correo ya está registrado' });
     }
 
-    // Verificar si el usuario ya existe
     const [existingUser] = await pool.execute(
       'SELECT Pk_ID_usuario FROM Tbl_usuarios WHERE Usuario = ?',
       [usuario]
@@ -412,16 +394,13 @@ app.post('/api/registro', async (req, res) => {
       return res.status(400).json({ error: 'El nombre de usuario ya existe' });
     }
 
-    // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // Insertar usuario
     const [result] = await pool.execute(
       'INSERT INTO Tbl_usuarios (Nombre, Apellido, Usuario, Correo, Contrasena, Rol, Estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [nombre, apellido, usuario, correo, hashedPassword, 'usuario', 'activo']
     );
 
-    // Enviar correo de confirmación
     if (transporter) {
       const mailOptions = {
         from: {
@@ -429,20 +408,20 @@ app.post('/api/registro', async (req, res) => {
           address: process.env.EMAIL_USER
         },
         to: correo,
-        subject: '🎉 ¡Bienvenido a LENSEGUA! Tu cuenta ha sido creada exitosamente',
+        subject: '¡Bienvenido a LENSEGUA! Tu cuenta ha sido creada exitosamente',
         html: generarHTMLConfirmacion(`${nombre} ${apellido}`)
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          console.error('❌ Error al enviar correo:', error);
+          console.error('Error al enviar correo:', error);
         } else {
-          console.log('✅ Correo de bienvenida enviado exitosamente a:', correo);
-          console.log('📧 Message ID:', info.messageId);
+          console.log('Correo de bienvenida enviado exitosamente a:', correo);
+          console.log('Message ID:', info.messageId);
         }
       });
     } else {
-      console.log('⚠️  Correo no configurado - usuario registrado sin notificación por email');
+      console.log('Correo no configurado - usuario registrado sin notificación por email');
     }
 
     res.status(201).json({ 
@@ -455,7 +434,6 @@ app.post('/api/registro', async (req, res) => {
   } catch (error) {
     console.error('Error en registro:', error);
     
-    // Errores específicos de base de datos
     if (error.code === 'ER_ACCESS_DENIED_ERROR') {
       return res.status(500).json({ error: 'Error de acceso a la base de datos. Verifica las credenciales.' });
     }
@@ -470,7 +448,6 @@ app.post('/api/registro', async (req, res) => {
   }
 });
 
-// Login
 app.post('/api/login', async (req, res) => {
   try {
     const { usuario, contrasena } = req.body;
@@ -479,7 +456,6 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'Usuario y contraseña son obligatorios' });
     }
 
-    // Buscar usuario
     const [users] = await pool.execute(
       'SELECT Pk_ID_usuario, Nombre, Usuario, Correo, Contrasena, Rol, Estado FROM Tbl_usuarios WHERE Usuario = ?',
       [usuario]
@@ -495,14 +471,11 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Cuenta desactivada' });
     }
 
-    // Verificar contraseña
     let validPassword = false;
     
-    // Verificación especial para usuario admin (para pruebas)
     if (user.Usuario === 'admin' && contrasena === 'admin123') {
       validPassword = true;
     } else {
-      // Verificación normal con bcrypt
       validPassword = await bcrypt.compare(contrasena, user.Contrasena);
     }
     
@@ -510,7 +483,6 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    // Generar JWT
     const token = jwt.sign(
       { 
         userId: user.Pk_ID_usuario, 
@@ -540,7 +512,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Obtener perfil del usuario
 app.get('/api/perfil', authenticateToken, async (req, res) => {
   try {
     const [users] = await pool.execute(
@@ -559,14 +530,12 @@ app.get('/api/perfil', authenticateToken, async (req, res) => {
   }
 });
 
-// Obtener lecciones
 app.get('/api/lecciones', authenticateToken, async (req, res) => {
   try {
     const [lecciones] = await pool.execute(
       'SELECT Pk_ID_leccion, Nombre, Descripcion FROM Tbl_lecciones ORDER BY Pk_ID_leccion'
     );
 
-    // Obtener progreso del usuario
     const [progreso] = await pool.execute(
       'SELECT Fk_leccion, Porcen_Av FROM Tbl_Progreso WHERE Fk_ID_usuario = ?',
       [req.user.userId]
@@ -590,7 +559,6 @@ app.get('/api/lecciones', authenticateToken, async (req, res) => {
   }
 });
 
-// Obtener contenido de una lección
 app.get('/api/lecciones/:id/contenido', authenticateToken, async (req, res) => {
   try {
     const leccionId = req.params.id;
@@ -607,7 +575,6 @@ app.get('/api/lecciones/:id/contenido', authenticateToken, async (req, res) => {
   }
 });
 
-// Guardar progreso
 app.post('/api/progreso', authenticateToken, async (req, res) => {
   try {
     const { leccionId, porcentaje } = req.body;
@@ -616,20 +583,17 @@ app.post('/api/progreso', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Datos de progreso inválidos' });
     }
 
-    // Verificar si ya existe progreso para esta lección
     const [existing] = await pool.execute(
       'SELECT Pk_ID_prog FROM Tbl_Progreso WHERE Fk_ID_usuario = ? AND Fk_leccion = ?',
       [req.user.userId, leccionId]
     );
 
     if (existing.length > 0) {
-      // Actualizar progreso existente
       await pool.execute(
         'UPDATE Tbl_Progreso SET Porcen_Av = ? WHERE Fk_ID_usuario = ? AND Fk_leccion = ?',
         [porcentaje, req.user.userId, leccionId]
       );
     } else {
-      // Crear nuevo progreso
       await pool.execute(
         'INSERT INTO Tbl_Progreso (Fk_ID_usuario, Fk_leccion, Porcen_Av) VALUES (?, ?, ?)',
         [req.user.userId, leccionId, porcentaje]
@@ -643,7 +607,6 @@ app.post('/api/progreso', authenticateToken, async (req, res) => {
   }
 });
 
-// Obtener estadísticas del usuario
 app.get('/api/estadisticas', authenticateToken, async (req, res) => {
   try {
     const [progreso] = await pool.execute(
@@ -672,7 +635,6 @@ app.get('/api/estadisticas', authenticateToken, async (req, res) => {
   }
 });
 
-// Recuperar contraseña
 app.post('/api/recuperar-password', async (req, res) => {
   try {
     const { correo } = req.body;
@@ -733,9 +695,6 @@ app.post('/api/recuperar-password', async (req, res) => {
   }
 });
 
-// ==================== ENDPOINTS DE ADMINISTRADOR ====================
-
-// Obtener todos los usuarios (solo administradores)
 app.get('/api/admin/usuarios', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const [usuarios] = await pool.execute(
@@ -749,19 +708,14 @@ app.get('/api/admin/usuarios', authenticateToken, requireAdmin, async (req, res)
   }
 });
 
-// Obtener estadísticas generales (solo administradores)
 app.get('/api/admin/estadisticas', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    // Total de usuarios
     const [totalUsuarios] = await pool.execute('SELECT COUNT(*) as total FROM Tbl_usuarios');
     
-    // Usuarios activos
     const [usuariosActivos] = await pool.execute('SELECT COUNT(*) as total FROM Tbl_usuarios WHERE Estado = "activo"');
     
-    // Total de lecciones
     const [totalLecciones] = await pool.execute('SELECT COUNT(*) as total FROM Tbl_lecciones');
     
-    // Progreso general de todos los usuarios
     const [progresoGeneral] = await pool.execute(`
       SELECT 
         AVG(p.Porcen_Av) as promedio_progreso,
@@ -769,7 +723,6 @@ app.get('/api/admin/estadisticas', authenticateToken, requireAdmin, async (req, 
       FROM Tbl_Progreso p
     `);
 
-    // Usuarios por rol
     const [usuariosPorRol] = await pool.execute(`
       SELECT Rol, COUNT(*) as cantidad 
       FROM Tbl_usuarios 
@@ -790,7 +743,6 @@ app.get('/api/admin/estadisticas', authenticateToken, requireAdmin, async (req, 
   }
 });
 
-// Cambiar estado de usuario (solo administradores)
 app.put('/api/admin/usuarios/:id/estado', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -816,7 +768,6 @@ app.put('/api/admin/usuarios/:id/estado', authenticateToken, requireAdmin, async
   }
 });
 
-// Cambiar rol de usuario (solo administradores)
 app.put('/api/admin/usuarios/:id/rol', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -826,7 +777,6 @@ app.put('/api/admin/usuarios/:id/rol', authenticateToken, requireAdmin, async (r
       return res.status(400).json({ error: 'Rol inválido. Debe ser "usuario" o "administrador"' });
     }
 
-    // No permitir cambiar el rol del propio administrador
     if (parseInt(id) === req.user.userId) {
       return res.status(400).json({ error: 'No puedes cambiar tu propio rol' });
     }
@@ -847,7 +797,6 @@ app.put('/api/admin/usuarios/:id/rol', authenticateToken, requireAdmin, async (r
   }
 });
 
-// Obtener progreso de todos los usuarios (solo administradores)
 app.get('/api/admin/progreso', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const [progreso] = await pool.execute(`
@@ -873,5 +822,5 @@ app.get('/api/admin/progreso', authenticateToken, requireAdmin, async (req, res)
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });

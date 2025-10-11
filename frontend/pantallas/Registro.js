@@ -74,43 +74,43 @@ export default function Registro({ navigation }) {
     if (!nombre.trim()) {
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'El nombre es obligatorio');
+      Alert.alert('Error', 'El nombre es obligatorio');
       return false;
     }
     if (!apellido.trim()) {
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'El apellido es obligatorio');
+      Alert.alert('Error', 'El apellido es obligatorio');
       return false;
     }
     if (!nombreUsuario.trim()) {
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'El nombre de usuario es obligatorio');
+      Alert.alert('Error', 'El nombre de usuario es obligatorio');
       return false;
     }
     if (!correo.trim()) {
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'El correo electrónico es obligatorio');
+      Alert.alert('Error', 'El correo electrónico es obligatorio');
       return false;
     }
     if (!contrasena.trim()) {
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'La contraseña es obligatoria');
+      Alert.alert('Error', 'La contraseña es obligatoria');
       return false;
     }
     if (contrasena.length < 8) {
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'La contraseña debe tener al menos 8 caracteres');
+      Alert.alert('Error', 'La contraseña debe tener al menos 8 caracteres');
       return false;
     }
     if (!/[A-Za-z]/.test(contrasena) || !/[0-9]/.test(contrasena)) {
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'La contraseña debe contener al menos una letra y un número');
+      Alert.alert('Error', 'La contraseña debe contener al menos una letra y un número');
       return false;
     }
     return true;
@@ -146,12 +146,12 @@ export default function Registro({ navigation }) {
         
         // Mostrar mensaje de éxito más claro
         const emailMessage = data.emailSent ? 
-          '\n📧 Se ha enviado un correo de bienvenida a tu email con más información.' : 
-          '\n⚠️ El correo de bienvenida no pudo ser enviado.';
+          '\nSe ha enviado un correo de bienvenida a tu email con más información.' : 
+          '\nEl correo de bienvenida no pudo ser enviado.';
         
         Alert.alert(
-          '🎉 ¡Usuario Creado Exitosamente!',
-          `¡Hola ${nombre}! Tu cuenta ha sido creada correctamente.\n\n✅ Usuario: ${nombreUsuario}\n✅ Correo: ${correo}${emailMessage}\n\nAhora puedes iniciar sesión con tus credenciales.`,
+          '¡Usuario Creado Exitosamente!',
+          `¡Hola ${nombre}! Tu cuenta ha sido creada correctamente.\n\nUsuario: ${nombreUsuario}\nCorreo: ${correo}${emailMessage}\n\nAhora puedes iniciar sesión con tus credenciales.`,
           [
             {
               text: 'Iniciar Sesión',
@@ -168,13 +168,13 @@ export default function Registro({ navigation }) {
       } else {
         setPersonajeAnimado('triste');
         setTimeout(() => setPersonajeAnimado('normal'), 2000);
-        Alert.alert('❌ Error', data.error || 'Error al registrar usuario');
+        Alert.alert('Error', data.error || 'Error al registrar usuario');
       }
     } catch (error) {
       console.error('Error:', error);
       setPersonajeAnimado('triste');
       setTimeout(() => setPersonajeAnimado('normal'), 2000);
-      Alert.alert('❌ Error', 'Error de conexión. Verifica que el servidor esté funcionando.');
+      Alert.alert('Error', 'Error de conexión. Verifica que el servidor esté funcionando.');
     } finally {
       setLoading(false);
     }

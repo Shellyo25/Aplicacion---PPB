@@ -1,6 +1,6 @@
 DROP DATABASE IF EXISTS lensegua;
 CREATE DATABASE lensegua;
-use lensegua;
+USE lensegua;
 
 CREATE TABLE Tbl_usuarios (
     Pk_ID_usuario INT PRIMARY KEY AUTO_INCREMENT,
@@ -68,6 +68,9 @@ CREATE TABLE Tbl_Progreso (
     FOREIGN KEY (Fk_leccion) REFERENCES Tbl_lecciones(Pk_ID_leccion)
 );
 
+INSERT INTO Tbl_usuarios (Nombre, Apellido, Usuario, Correo, Contrasena, Rol, Estado) VALUES
+('Administrador', 'Sistema', 'admin', 'admin@lensegua.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrador', 'activo');
+
 INSERT INTO Tbl_lecciones (Nombre, Descripcion, Nivel, Orden, Imagen) VALUES
 ('Abecedario Básico', 'Aprende las primeras letras del alfabeto (A-E) en lengua de señas guatemalteca', 1, 1, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/abecedario.png'),
 ('Abecedario Intermedio', 'Continúa aprendiendo las letras del alfabeto (F-M) en lengua de señas', 1, 2, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/abecedario2.png'),
@@ -104,7 +107,6 @@ INSERT INTO Tbl_lecciones (Nombre, Descripcion, Nivel, Orden, Imagen) VALUES
 ('Días Básicos', 'Los días de la semana en lengua de señas', 1, 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dias.png'),
 ('Meses del Año', 'Los meses del año en lengua de señas', 1, 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/meses.png'),
 ('Tiempo y Estaciones', 'Conceptos de tiempo y estaciones en lengua de señas', 1, 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo.png');
-
 
 INSERT INTO Tbl_contenido (Descripcion, Fk_ID_leccion, Imagen, Tipo) VALUES
 ('Letra A', 1, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_a.png', 'imagen'),
@@ -328,5 +330,3 @@ INSERT INTO Tbl_TipoLeccion (Descripcion, Preguntas, Puntuacion) VALUES
 ('Asociación', 'Asocia la imagen con la seña correcta', 15.0),
 ('Práctica', 'Practica la seña mostrada', 20.0);
 
-INSERT INTO Tbl_usuarios (Nombre, Apellido, Usuario, Correo, Contrasena, Rol, Estado) VALUES
-('Administrador', 'Sistema', 'admin', 'admin@lensegua.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrador', 'activo');
