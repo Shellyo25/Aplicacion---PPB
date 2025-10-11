@@ -821,6 +821,228 @@ app.get('/api/admin/progreso', authenticateToken, requireAdmin, async (req, res)
   }
 });
 
+// Endpoint para actualizar perfil
+app.put('/api/perfil', authenticateToken, async (req, res) => {
+  try {
+    const { nombre, apellido, correo } = req.body;
+    const userId = req.user.userId;
+
+    if (!nombre || !apellido || !correo) {
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    if (!validateEmail(correo)) {
+      return res.status(400).json({ error: 'Formato de correo inválido' });
+    }
+
+    // Verificar si el correo ya está en uso por otro usuario
+    const [existingEmail] = await pool.execute(
+      'SELECT Pk_ID_usuario FROM Tbl_usuarios WHERE Correo = ? AND Pk_ID_usuario != ?',
+      [correo, userId]
+    );
+
+    if (existingEmail.length > 0) {
+      return res.status(400).json({ error: 'El correo ya está en uso por otro usuario' });
+    }
+
+    await pool.execute(
+      'UPDATE Tbl_usuarios SET Nombre = ?, Apellido = ?, Correo = ? WHERE Pk_ID_usuario = ?',
+      [nombre, apellido, correo, userId]
+    );
+
+    res.json({ message: 'Perfil actualizado exitosamente' });
+  } catch (error) {
+    console.error('Error al actualizar perfil:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Endpoint para cambiar contraseña
+app.put('/api/cambiar-contrasena', authenticateToken, async (req, res) => {
+  try {
+    const { contrasenaActual, nuevaContrasena } = req.body;
+    const userId = req.user.userId;
+
+    if (!contrasenaActual || !nuevaContrasena) {
+      return res.status(400).json({ error: 'Contraseña actual y nueva contraseña son obligatorias' });
+    }
+
+    if (!validatePassword(nuevaContrasena)) {
+      return res.status(400).json({ 
+        error: 'La nueva contraseña debe tener al menos 8 caracteres con números y letras' 
+      });
+    }
+
+    // Obtener contraseña actual del usuario
+    const [users] = await pool.execute(
+      'SELECT Contrasena FROM Tbl_usuarios WHERE Pk_ID_usuario = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const user = users[0];
+    
+    // Verificar contraseña actual
+    const validPassword = await bcrypt.compare(contrasenaActual, user.Contrasena);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+    }
+
+    // Hash de la nueva contraseña
+    const hashedNewPassword = await bcrypt.hash(nuevaContrasena, 10);
+
+    // Actualizar contraseña
+    await pool.execute(
+      'UPDATE Tbl_usuarios SET Contrasena = ? WHERE Pk_ID_usuario = ?',
+      [hashedNewPassword, userId]
+    );
+
+    res.json({ message: 'Contraseña cambiada exitosamente' });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Endpoint para enviar mensaje de soporte
+app.post('/api/soporte', authenticateToken, async (req, res) => {
+  try {
+    const { tipo, asunto, mensaje } = req.body;
+    const userId = req.user.userId;
+
+    if (!tipo || !asunto || !mensaje) {
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    // Obtener datos del usuario
+    const [users] = await pool.execute(
+      'SELECT Nombre, Apellido, Usuario, Correo FROM Tbl_usuarios WHERE Pk_ID_usuario = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const user = users[0];
+
+    if (transporter) {
+      const tiposSoporte = {
+        'soporte': '🔧 Soporte Técnico',
+        'bug': '🐛 Reporte de Bug',
+        'sugerencia': '💡 Sugerencia',
+        'general': '❓ Consulta General'
+      };
+
+      const mailOptions = {
+        from: {
+          name: 'LENSEGUA - Sistema de Soporte',
+          address: process.env.EMAIL_USER
+        },
+        to: 'lenseguagt@gmail.com',
+        subject: `${tiposSoporte[tipo] || tipo} - ${asunto}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #219ebc 0%, #023047 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+              <h1 style="margin: 0; font-size: 24px;">📞 Nuevo Mensaje de Soporte</h1>
+              <p style="margin: 10px 0 0 0; opacity: 0.9;">LENSEGUA - Sistema de Soporte</p>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h2 style="color: #023047; margin-top: 0;">Información del Usuario</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold; width: 120px;">Nombre:</td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Nombre} ${user.Apellido}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Usuario:</td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Usuario}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Correo}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Fecha:</td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${new Date().toLocaleString('es-GT')}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">Tipo:</td>
+                  <td style="padding: 8px 0;">${tiposSoporte[tipo] || tipo}</td>
+                </tr>
+              </table>
+              
+              <h2 style="color: #023047; margin-top: 30px;">Mensaje</h2>
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #219ebc;">
+                <h3 style="margin: 0 0 10px 0; color: #023047;">${asunto}</h3>
+                <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${mensaje}</p>
+              </div>
+              
+              <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; color: #1565c0; font-weight: bold;">
+                  📧 Responde directamente a: ${user.Correo}
+                </p>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+              <p>Este mensaje fue enviado desde el sistema de soporte de LENSEGUA</p>
+              <p>Fecha: ${new Date().toLocaleString('es-GT')}</p>
+            </div>
+          </div>
+        `
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error al enviar correo de soporte:', error);
+          return res.status(500).json({ error: 'Error al enviar el mensaje' });
+        } else {
+          console.log('Correo de soporte enviado exitosamente a lenseguagt@gmail.com');
+          console.log('Message ID:', info.messageId);
+          res.json({ message: 'Mensaje enviado exitosamente' });
+        }
+      });
+    } else {
+      res.status(503).json({ error: 'Servicio de correo no disponible' });
+    }
+
+  } catch (error) {
+    console.error('Error en soporte:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Endpoint para eliminar cuenta
+app.delete('/api/eliminar-cuenta', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Eliminar progreso del usuario
+    await pool.execute('DELETE FROM Tbl_Progreso WHERE Fk_ID_usuario = ?', [userId]);
+    
+    // Eliminar usuario
+    const [result] = await pool.execute(
+      'DELETE FROM Tbl_usuarios WHERE Pk_ID_usuario = ?',
+      [userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({ message: 'Cuenta eliminada exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar cuenta:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });

@@ -13,6 +13,14 @@ export default function Lecciones({ navigation }) {
     cargarLecciones();
   }, []);
 
+  // Recargar lecciones cuando se regresa a esta pantalla
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      cargarLecciones();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const cargarLecciones = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -31,7 +39,13 @@ export default function Lecciones({ navigation }) {
 
       if (response.ok) {
         const data = await response.json();
-        setLecciones(data.lecciones);
+        // Agregar información de desbloqueo y progreso
+        const leccionesConEstado = data.lecciones.map((leccion, index) => ({
+          ...leccion,
+          desbloqueada: index === 0 || (index > 0 && data.lecciones[index - 1].progreso >= 80),
+          progreso: leccion.progreso || 0
+        }));
+        setLecciones(leccionesConEstado);
       } else if (response.status === 401) {
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('userData');
@@ -112,11 +126,17 @@ export default function Lecciones({ navigation }) {
                     <View 
                       style={[
                         estilos.progresoFill, 
-                        { width: `${leccion.progreso}%` }
+                        { width: `${leccion.progreso}%` },
+                        leccion.progreso >= 80 && estilos.progresoCompletado
                       ]} 
                     />
                   </View>
-                  <Text style={estilos.progresoTexto}>{leccion.progreso}%</Text>
+                  <Text style={[
+                    estilos.progresoTexto,
+                    leccion.progreso >= 80 && estilos.progresoTextoCompletado
+                  ]}>
+                    {leccion.progreso >= 80 ? 'Completada' : `${leccion.progreso}%`}
+                  </Text>
                 </View>
               )}
 
@@ -130,7 +150,14 @@ export default function Lecciones({ navigation }) {
               {leccion.desbloqueada && leccion.progreso >= 80 && (
                 <View style={estilos.completadaContainer}>
                   <FontAwesome name="check-circle" size={16} color="#4CAF50" />
-                  <Text style={estilos.completadaTexto}>Completada</Text>
+                  <Text style={estilos.completadaTexto}>¡Lección completada!</Text>
+                </View>
+              )}
+
+              {leccion.desbloqueada && leccion.progreso > 0 && leccion.progreso < 80 && (
+                <View style={estilos.enProgresoContainer}>
+                  <FontAwesome name="clock-o" size={16} color="#fb8500" />
+                  <Text style={estilos.enProgresoTexto}>En progreso</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -238,10 +265,16 @@ const estilos = StyleSheet.create({
     backgroundColor: '#4CAF50',
     borderRadius: 4,
   },
+  progresoCompletado: {
+    backgroundColor: '#2E7D32',
+  },
   progresoTexto: {
     fontSize: 12,
     fontWeight: 'bold',
     color: '#4CAF50',
+  },
+  progresoTextoCompletado: {
+    color: '#2E7D32',
   },
   bloqueadaContainer: {
     flexDirection: 'row',
@@ -268,6 +301,20 @@ const estilos = StyleSheet.create({
     marginLeft: 5,
     fontSize: 12,
     color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+  enProgresoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    backgroundColor: '#fff3e0',
+    borderRadius: 6,
+  },
+  enProgresoTexto: {
+    marginLeft: 5,
+    fontSize: 12,
+    color: '#fb8500',
     fontWeight: 'bold',
   },
   sinLecciones: {

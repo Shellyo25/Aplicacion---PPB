@@ -65,7 +65,209 @@ INSERT INTO Tbl_contenido (Descripcion, Fk_ID_leccion, Imagen, Tipo) VALUES
 ('Número 2', 4, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_2.png', 'imagen'),
 ('Número 3', 4, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_3.png', 'imagen'),
 ('Número 4', 4, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_4.png', 'imagen'),
-('Número 5', 4, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_5.png', 'imagen');
+('Número 5', 4, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_5.png', 'imagen'),
+
+-- NÚMEROS INTERMEDIOS (Lección 5)
+('Número 6', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_6.png', 'imagen'),
+('Número 7', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_7.png', 'imagen'),
+('Número 8', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_8.png', 'imagen'),
+('Número 9', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_9.png', 'imagen'),
+('Número 10', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_10.png', 'imagen'),
+('Número 11', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_11.png', 'imagen'),
+('Número 12', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_12.png', 'imagen'),
+('Número 13', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_13.png', 'imagen'),
+('Número 14', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_14.png', 'imagen'),
+('Número 15', 5, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_15.png', 'imagen'),
+
+-- NÚMEROS AVANZADOS (Lección 6)
+('Número 16', 6, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_16.png', 'imagen'),
+('Número 17', 6, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_17.png', 'imagen'),
+('Número 18', 6, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_18.png', 'imagen'),
+('Número 19', 6, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_19.png', 'imagen'),
+('Número 20', 6, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_20.png', 'imagen'),
+('Número 25', 6, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_25.png', 'imagen'),
+('Número 30', 6, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_30.png', 'imagen'),
+
+-- SALUDOS BÁSICOS (Lección 7)
+('Hola', 7, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/saludo_hola.png', 'imagen'),
+('Buenos días', 7, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/saludo_buenos_dias.png', 'imagen'),
+('Buenas tardes', 7, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/saludo_buenas_tardes.png', 'imagen'),
+('Buenas noches', 7, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/saludo_buenas_noches.png', 'imagen'),
+('Adiós', 7, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/saludo_adios.png', 'imagen'),
+
+-- CONVERSACIÓN DIARIA (Lección 8)
+('¿Cómo estás?', 8, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/conversacion_como_estas.png', 'imagen'),
+('Muy bien', 8, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/conversacion_muy_bien.png', 'imagen'),
+('¿Qué tal?', 8, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/conversacion_que_tal.png', 'imagen'),
+('¿Cómo te llamas?', 8, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/conversacion_como_te_llamas.png', 'imagen'),
+('Me llamo...', 8, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/conversacion_me_llamo.png', 'imagen'),
+('Mucho gusto', 8, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/conversacion_mucho_gusto.png', 'imagen'),
+
+-- EXPRESIONES DE CORTESÍA (Lección 9)
+('Por favor', 9, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/cortesia_por_favor.png', 'imagen'),
+('Gracias', 9, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/cortesia_gracias.png', 'imagen'),
+('De nada', 9, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/cortesia_de_nada.png', 'imagen'),
+('Disculpe', 9, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/cortesia_disculpe.png', 'imagen'),
+('Perdón', 9, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/cortesia_perdon.png', 'imagen'),
+('Con permiso', 9, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/cortesia_con_permiso.png', 'imagen'),
+
+-- COLORES PRIMARIOS (Lección 10)
+('Rojo', 10, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_rojo.png', 'imagen'),
+('Azul', 10, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_azul.png', 'imagen'),
+('Amarillo', 10, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_amarillo.png', 'imagen'),
+('Verde', 10, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_verde.png', 'imagen'),
+('Negro', 10, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_negro.png', 'imagen'),
+('Blanco', 10, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_blanco.png', 'imagen'),
+
+-- COLORES SECUNDARIOS (Lección 11)
+('Naranja', 11, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_naranja.png', 'imagen'),
+('Morado', 11, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_morado.png', 'imagen'),
+('Rosa', 11, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_rosa.png', 'imagen'),
+('Café', 11, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_cafe.png', 'imagen'),
+('Gris', 11, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_gris.png', 'imagen'),
+('Celeste', 11, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_celeste.png', 'imagen'),
+
+-- COLORES ESPECIALES (Lección 12)
+('Dorado', 12, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_dorado.png', 'imagen'),
+('Plateado', 12, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_plateado.png', 'imagen'),
+('Turquesa', 12, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_turquesa.png', 'imagen'),
+('Magenta', 12, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_magenta.png', 'imagen'),
+('Beige', 12, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_beige.png', 'imagen'),
+('Coral', 12, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/color_coral.png', 'imagen'),
+
+-- FAMILIA INMEDIATA (Lección 13)
+('Mamá', 13, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_mama.png', 'imagen'),
+('Papá', 13, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_papa.png', 'imagen'),
+('Hermano', 13, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_hermano.png', 'imagen'),
+('Hermana', 13, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_hermana.png', 'imagen'),
+('Hijo', 13, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_hijo.png', 'imagen'),
+('Hija', 13, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_hija.png', 'imagen'),
+
+-- FAMILIA EXTENDIDA (Lección 14)
+('Abuelo', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_abuelo.png', 'imagen'),
+('Abuela', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_abuela.png', 'imagen'),
+('Tío', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_tio.png', 'imagen'),
+('Tía', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_tia.png', 'imagen'),
+('Primo', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_primo.png', 'imagen'),
+('Prima', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_prima.png', 'imagen'),
+('Sobrino', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_sobrino.png', 'imagen'),
+('Sobrina', 14, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_sobrina.png', 'imagen'),
+
+-- RELACIONES FAMILIARES (Lección 15)
+('Suegro', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_suegro.png', 'imagen'),
+('Suegra', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_suegra.png', 'imagen'),
+('Yerno', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_yerno.png', 'imagen'),
+('Nuera', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_nuera.png', 'imagen'),
+('Cuñado', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_cunado.png', 'imagen'),
+('Cuñada', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_cunada.png', 'imagen'),
+('Padrastro', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_padrastro.png', 'imagen'),
+('Madrastra', 15, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/familia_madrastra.png', 'imagen'),
+
+-- LUGARES COMUNES (Lección 16)
+('Casa', 16, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_casa.png', 'imagen'),
+('Escuela', 16, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_escuela.png', 'imagen'),
+('Trabajo', 16, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_trabajo.png', 'imagen'),
+('Parque', 16, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_parque.png', 'imagen'),
+('Tienda', 16, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_tienda.png', 'imagen'),
+('Mercado', 16, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_mercado.png', 'imagen'),
+
+-- LUGARES PÚBLICOS (Lección 17)
+('Hospital', 17, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_hospital.png', 'imagen'),
+('Policía', 17, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_policia.png', 'imagen'),
+('Banco', 17, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_banco.png', 'imagen'),
+('Oficina', 17, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_oficina.png', 'imagen'),
+('Iglesia', 17, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_iglesia.png', 'imagen'),
+('Biblioteca', 17, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_biblioteca.png', 'imagen'),
+
+-- LUGARES ESPECIALES (Lección 18)
+('Antigua Guatemala', 18, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_antigua.png', 'imagen'),
+('Tikal', 18, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_tikal.png', 'imagen'),
+('Lago de Atitlán', 18, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_atitlan.png', 'imagen'),
+('Volcán de Agua', 18, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_volcan_agua.png', 'imagen'),
+('Zoológico', 18, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_zoologico.png', 'imagen'),
+('Museo', 18, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/lugar_museo.png', 'imagen'),
+
+-- FRUTAS TROPICALES (Lección 19)
+('Plátano', 19, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_platano.png', 'imagen'),
+('Mango', 19, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_mango.png', 'imagen'),
+('Piña', 19, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_pina.png', 'imagen'),
+('Papaya', 19, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_papaya.png', 'imagen'),
+('Coco', 19, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_coco.png', 'imagen'),
+('Guayaba', 19, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_guayaba.png', 'imagen'),
+
+-- FRUTAS DE TEMPORADA (Lección 20)
+('Manzana', 20, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_manzana.png', 'imagen'),
+('Pera', 20, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_pera.png', 'imagen'),
+('Uva', 20, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_uva.png', 'imagen'),
+('Fresa', 20, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_fresa.png', 'imagen'),
+('Durazno', 20, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_durazno.png', 'imagen'),
+('Cereza', 20, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_cereza.png', 'imagen'),
+
+-- FRUTAS EXÓTICAS (Lección 21)
+('Rambután', 21, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_rambutan.png', 'imagen'),
+('Lichi', 21, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_lichi.png', 'imagen'),
+('Carambola', 21, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_carambola.png', 'imagen'),
+('Granadilla', 21, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_granadilla.png', 'imagen'),
+('Maracuyá', 21, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_maracuya.png', 'imagen'),
+('Tamarindo', 21, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/fruta_tamarindo.png', 'imagen'),
+
+-- VERDURAS BÁSICAS (Lección 22)
+('Tomate', 22, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_tomate.png', 'imagen'),
+('Cebolla', 22, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_cebolla.png', 'imagen'),
+('Papa', 22, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_papa.png', 'imagen'),
+('Zanahoria', 22, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_zanahoria.png', 'imagen'),
+('Chile', 22, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_chile.png', 'imagen'),
+('Ajo', 22, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_ajo.png', 'imagen'),
+
+-- VERDURAS DE HOJA (Lección 23)
+('Lechuga', 23, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_lechuga.png', 'imagen'),
+('Espinaca', 23, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_espinaca.png', 'imagen'),
+('Repollo', 23, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_repollo.png', 'imagen'),
+('Acelga', 23, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_acelga.png', 'imagen'),
+('Apio', 23, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_apio.png', 'imagen'),
+('Perejil', 23, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_perejil.png', 'imagen'),
+
+-- VERDURAS DE RAÍZ (Lección 24)
+('Rábano', 24, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_rabano.png', 'imagen'),
+('Remolacha', 24, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_remolacha.png', 'imagen'),
+('Nabo', 24, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_nabo.png', 'imagen'),
+('Yuca', 24, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_yuca.png', 'imagen'),
+('Camote', 24, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_camote.png', 'imagen'),
+('Jengibre', 24, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/verdura_jengibre.png', 'imagen'),
+
+-- DÍAS BÁSICOS (Lección 25)
+('Lunes', 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dia_lunes.png', 'imagen'),
+('Martes', 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dia_martes.png', 'imagen'),
+('Miércoles', 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dia_miercoles.png', 'imagen'),
+('Jueves', 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dia_jueves.png', 'imagen'),
+('Viernes', 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dia_viernes.png', 'imagen'),
+('Sábado', 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dia_sabado.png', 'imagen'),
+('Domingo', 25, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/dia_domingo.png', 'imagen'),
+
+-- MESES DEL AÑO (Lección 26)
+('Enero', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_enero.png', 'imagen'),
+('Febrero', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_febrero.png', 'imagen'),
+('Marzo', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_marzo.png', 'imagen'),
+('Abril', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_abril.png', 'imagen'),
+('Mayo', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_mayo.png', 'imagen'),
+('Junio', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_junio.png', 'imagen'),
+('Julio', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_julio.png', 'imagen'),
+('Agosto', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_agosto.png', 'imagen'),
+('Septiembre', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_septiembre.png', 'imagen'),
+('Octubre', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_octubre.png', 'imagen'),
+('Noviembre', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_noviembre.png', 'imagen'),
+('Diciembre', 26, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mes_diciembre.png', 'imagen'),
+
+-- TIEMPO Y ESTACIONES (Lección 27)
+('Primavera', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_primavera.png', 'imagen'),
+('Verano', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_verano.png', 'imagen'),
+('Otoño', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_otono.png', 'imagen'),
+('Invierno', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_invierno.png', 'imagen'),
+('Hoy', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_hoy.png', 'imagen'),
+('Ayer', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_ayer.png', 'imagen'),
+('Mañana', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_manana.png', 'imagen'),
+('Tarde', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_tarde.png', 'imagen'),
+('Noche', 27, 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/tiempo_noche.png', 'imagen');
 
 -- VERIFICACIÓN FINAL
 SELECT 'Usuarios con roles:' as info;

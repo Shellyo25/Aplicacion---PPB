@@ -81,10 +81,12 @@ export default function Ejercicios({ navigation }) {
     
     if (respuestaSeleccionada.correcta) {
       setPuntuacion(puntuacion + 10);
-      Alert.alert('¡Correcto!', '¡Excelente trabajo!', [{ text: 'Continuar', onPress: siguienteEjercicio }]);
-    } else {
-      Alert.alert('Incorrecto', 'No te preocupes, sigue practicando.', [{ text: 'Continuar', onPress: siguienteEjercicio }]);
     }
+    
+    // Automáticamente pasar al siguiente ejercicio después de 2 segundos
+    setTimeout(() => {
+      siguienteEjercicio();
+    }, 2000);
   };
 
   const siguienteEjercicio = () => {
@@ -138,6 +140,30 @@ export default function Ejercicios({ navigation }) {
 
   if (ejercicioCompletado) {
     const porcentaje = Math.round((puntuacion / (ejercicios.length * 10)) * 100);
+    const respuestasCorrectas = Math.floor(puntuacion / 10);
+    
+    // Determinar el mensaje según el rendimiento
+    let mensajeFelicitacion = '';
+    let iconoResultado = '';
+    let colorResultado = '#fb8500';
+    
+    if (porcentaje >= 90) {
+      mensajeFelicitacion = '¡Excelente! 🌟';
+      iconoResultado = 'star';
+      colorResultado = '#4CAF50';
+    } else if (porcentaje >= 70) {
+      mensajeFelicitacion = '¡Muy bien! 👏';
+      iconoResultado = 'thumbs-up';
+      colorResultado = '#2196F3';
+    } else if (porcentaje >= 50) {
+      mensajeFelicitacion = '¡Bien hecho! 👍';
+      iconoResultado = 'smile-o';
+      colorResultado = '#FF9800';
+    } else {
+      mensajeFelicitacion = '¡Sigue practicando! 💪';
+      iconoResultado = 'refresh';
+      colorResultado = '#f44336';
+    }
     
     return (
       <View style={estilos.contenedor}>
@@ -149,27 +175,44 @@ export default function Ejercicios({ navigation }) {
           <View style={estilos.placeholder} />
         </View>
 
-        <View style={estilos.resultadoContainer}>
-          <FontAwesome name="trophy" size={80} color="#fb8500" />
-          <Text style={estilos.tituloResultado}>¡Felicitaciones!</Text>
-          <Text style={estilos.puntuacionTexto}>Puntuación: {puntuacion}/{ejercicios.length * 10}</Text>
-          <Text style={estilos.porcentajeTexto}>Porcentaje: {porcentaje}%</Text>
-          
-          <View style={estilos.botonesResultado}>
-            <TouchableOpacity style={estilos.boton} onPress={reiniciarEjercicios}>
-              <FontAwesome name="refresh" size={20} color="#fff" style={estilos.iconoBoton} />
-              <Text style={estilos.botonTexto}>Repetir ejercicios</Text>
-            </TouchableOpacity>
+        <ScrollView style={estilos.contenido}>
+          <View style={estilos.resultadoContainer}>
+            <FontAwesome name={iconoResultado} size={80} color={colorResultado} />
+            <Text style={estilos.tituloResultado}>{mensajeFelicitacion}</Text>
             
-            <TouchableOpacity 
-              style={[estilos.boton, estilos.botonSecundario]} 
-              onPress={() => navigation.navigate('Listalecciones')}
-            >
-              <FontAwesome name="book" size={20} color="#023047" style={estilos.iconoBoton} />
-              <Text style={[estilos.botonTexto, estilos.botonTextoSecundario]}>Ver lecciones</Text>
-            </TouchableOpacity>
+            <View style={estilos.estadisticasContainer}>
+              <View style={estilos.estadisticaItem}>
+                <Text style={estilos.estadisticaNumero}>{respuestasCorrectas}/{ejercicios.length}</Text>
+                <Text style={estilos.estadisticaLabel}>Respuestas Correctas</Text>
+              </View>
+              
+              <View style={estilos.estadisticaItem}>
+                <Text style={estilos.estadisticaNumero}>{puntuacion}/{ejercicios.length * 10}</Text>
+                <Text style={estilos.estadisticaLabel}>Puntuación Total</Text>
+              </View>
+              
+              <View style={estilos.estadisticaItem}>
+                <Text style={[estilos.estadisticaNumero, { color: colorResultado }]}>{porcentaje}%</Text>
+                <Text style={estilos.estadisticaLabel}>Porcentaje</Text>
+              </View>
+            </View>
+            
+            <View style={estilos.botonesResultado}>
+              <TouchableOpacity style={estilos.boton} onPress={reiniciarEjercicios}>
+                <FontAwesome name="refresh" size={20} color="#fff" style={estilos.iconoBoton} />
+                <Text style={estilos.botonTexto}>Repetir ejercicios</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[estilos.boton, estilos.botonSecundario]} 
+                onPress={() => navigation.navigate('Listalecciones')}
+              >
+                <FontAwesome name="book" size={20} color="#023047" style={estilos.iconoBoton} />
+                <Text style={[estilos.botonTexto, estilos.botonTextoSecundario]}>Ver lecciones</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -240,6 +283,23 @@ export default function Ejercicios({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Feedback inmediato */}
+        {mostrarResultado && (
+          <View style={estilos.feedbackContainer}>
+            <Text style={[
+              estilos.feedbackTexto,
+              respuestaSeleccionada?.correcta ? estilos.feedbackCorrecto : estilos.feedbackIncorrecto
+            ]}>
+              {respuestaSeleccionada?.correcta ? '¡Correcto! 🎉' : 'Incorrecto 😔'}
+            </Text>
+            <Text style={estilos.feedbackSubtexto}>
+              {respuestaSeleccionada?.correcta 
+                ? '¡Excelente trabajo! Pasando al siguiente ejercicio...' 
+                : 'No te preocupes, sigue practicando. Pasando al siguiente ejercicio...'}
+            </Text>
+          </View>
+        )}
 
         {/* Botón de verificación */}
         {!mostrarResultado && (
@@ -449,5 +509,65 @@ const estilos = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: '#023047',
+  },
+  feedbackContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  feedbackTexto: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  feedbackCorrecto: {
+    color: '#4CAF50',
+  },
+  feedbackIncorrecto: {
+    color: '#f44336',
+  },
+  feedbackSubtexto: {
+    fontSize: 16,
+    color: '#023047',
+    textAlign: 'center',
+    opacity: 0.8,
+  },
+  estadisticasContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginVertical: 30,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  estadisticaItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  estadisticaNumero: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#023047',
+    marginBottom: 5,
+  },
+  estadisticaLabel: {
+    fontSize: 12,
+    color: '#023047',
+    textAlign: 'center',
+    opacity: 0.7,
   },
 });
