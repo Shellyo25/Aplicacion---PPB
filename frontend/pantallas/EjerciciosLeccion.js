@@ -50,34 +50,16 @@ export default function EjerciciosLeccion({ route, navigation }) {
     const mapeoPorNombre = {
       'Abecedario': 1,
       'Abecedario Básico': 1,
-      'Abecedario Intermedio': 2,
-      'Abecedario Avanzado': 3,
-      'Números': 4,
-      'Números Básicos': 4,
-      'Números Intermedios': 5,
-      'Números Avanzados': 6,
-      'Saludos Básicos': 7,
-      'Conversación Diaria': 8,
-      'Expresiones de Cortesía': 9,
-      'Frases de cortesía': 7, // Mapeo alternativo
-      'Colores Primarios': 10,
-      'Colores Secundarios': 11,
-      'Colores Especiales': 12,
-      'Familia Inmediata': 13,
-      'Familia Extendida': 14,
-      'Relaciones Familiares': 15,
-      'Lugares Comunes': 16,
-      'Lugares Públicos': 17,
-      'Lugares Especiales': 18,
-      'Frutas Tropicales': 19,
-      'Frutas de Temporada': 20,
-      'Frutas Exóticas': 21,
-      'Verduras Básicas': 22,
-      'Verduras de Hoja': 23,
-      'Verduras de Raíz': 24,
-      'Días Básicos': 25,
-      'Meses del Año': 26,
-      'Tiempo y Estaciones': 27
+      'Números': 2,
+      'Números Básicos': 2,
+      'Expresiones de cortesía': 3, // Mapeo alternativo
+      'Colores Básicos': 4,
+      'Familia Principal': 5,
+      'Lugares Comunes': 6,
+      'Frutas Básicas': 7,
+      'Verduras Básicas': 8,
+      'Días de la Semana': 9,
+
     };
     
     // Usar el mapeo por nombre si está disponible, sino usar el ID directo
@@ -85,13 +67,13 @@ export default function EjerciciosLeccion({ route, navigation }) {
     console.log('ID de ejercicios a usar:', idEjercicios);
     
     const ejerciciosBase = {
-      // ABECEDARIO (lecciones 1-3)
-      1: [ // Abecedario Básico (A-E)
+      // ABECEDARIO (lecciones 1)
+      1: [ // Abecedario (A-z)
         {
           id: 1,
           tipo: 'opcion_multiple',
           pregunta: '¿Cuál es la seña correcta para la letra "A"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_a.png',
+          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1760313383/a_npesc9.jpg',
           opciones: [
             { id: 1, texto: 'Seña A', correcta: true },
             { id: 2, texto: 'Seña B', correcta: false },
@@ -103,10 +85,10 @@ export default function EjerciciosLeccion({ route, navigation }) {
           id: 2,
           tipo: 'asociacion',
           pregunta: 'Asocia la imagen con la seña correcta de la letra "B"',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_b.png',
+          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1760314589/b_f4wzta.jpg',
           opciones: [
-            { id: 1, texto: 'Letra B', correcta: true },
             { id: 2, texto: 'Letra A', correcta: false },
+            { id: 1, texto: 'Letra B', correcta: true  },
             { id: 3, texto: 'Letra C', correcta: false },
             { id: 4, texto: 'Letra D', correcta: false }
           ]
@@ -117,91 +99,15 @@ export default function EjerciciosLeccion({ route, navigation }) {
           pregunta: '¿Cuál es la seña para la letra "C"?',
           imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_c.png',
           opciones: [
-            { id: 1, texto: 'Seña C', correcta: true },
+            { id: 1, texto: 'Seña C', correcta: true  },
             { id: 2, texto: 'Seña A', correcta: false },
             { id: 3, texto: 'Seña B', correcta: false },
             { id: 4, texto: 'Seña D', correcta: false }
           ]
         }
       ],
-      2: [ // Abecedario Intermedio (F-M)
-        {
-          id: 1,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña correcta para la letra "F"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_f.png',
-          opciones: [
-            { id: 1, texto: 'Seña F', correcta: true },
-            { id: 2, texto: 'Seña G', correcta: false },
-            { id: 3, texto: 'Seña H', correcta: false },
-            { id: 4, texto: 'Seña I', correcta: false }
-          ]
-        },
-        {
-          id: 2,
-          tipo: 'asociacion',
-          pregunta: 'Asocia la imagen con la seña correcta de la letra "M"',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_m.png',
-          opciones: [
-            { id: 1, texto: 'Letra M', correcta: true },
-            { id: 2, texto: 'Letra L', correcta: false },
-            { id: 3, texto: 'Letra K', correcta: false },
-            { id: 4, texto: 'Letra N', correcta: false }
-          ]
-        },
-        {
-          id: 3,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña para la letra "H"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_h.png',
-          opciones: [
-            { id: 1, texto: 'Seña H', correcta: true },
-            { id: 2, texto: 'Seña F', correcta: false },
-            { id: 3, texto: 'Seña G', correcta: false },
-            { id: 4, texto: 'Seña I', correcta: false }
-          ]
-        }
-      ],
-      3: [ // Abecedario Avanzado (N-Z)
-        {
-          id: 1,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña correcta para la letra "N"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_n.png',
-          opciones: [
-            { id: 1, texto: 'Seña N', correcta: true },
-            { id: 2, texto: 'Seña O', correcta: false },
-            { id: 3, texto: 'Seña P', correcta: false },
-            { id: 4, texto: 'Seña Q', correcta: false }
-          ]
-        },
-        {
-          id: 2,
-          tipo: 'asociacion',
-          pregunta: 'Asocia la imagen con la seña correcta de la letra "Z"',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_z.png',
-          opciones: [
-            { id: 1, texto: 'Letra Z', correcta: true },
-            { id: 2, texto: 'Letra Y', correcta: false },
-            { id: 3, texto: 'Letra X', correcta: false },
-            { id: 4, texto: 'Letra W', correcta: false }
-          ]
-        },
-        {
-          id: 3,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña para la letra "R"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/letra_r.png',
-          opciones: [
-            { id: 1, texto: 'Seña R', correcta: true },
-            { id: 2, texto: 'Seña S', correcta: false },
-            { id: 3, texto: 'Seña T', correcta: false },
-            { id: 4, texto: 'Seña U', correcta: false }
-          ]
-        }
-      ],
-      // NÚMEROS (lecciones 4-6)
-      4: [ // Números Básicos (0-5)
+      // NÚMEROS (lecciones 2)
+      2: [ // Números Básicos (0-5)
         {
           id: 1,
           tipo: 'opcion_multiple',
@@ -239,84 +145,7 @@ export default function EjerciciosLeccion({ route, navigation }) {
           ]
         }
       ],
-      5: [ // Números Intermedios (6-15)
-        {
-          id: 1,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña correcta para el número "10"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_10.png',
-          opciones: [
-            { id: 1, texto: 'Número 10', correcta: true },
-            { id: 2, texto: 'Número 9', correcta: false },
-            { id: 3, texto: 'Número 11', correcta: false },
-            { id: 4, texto: 'Número 12', correcta: false }
-          ]
-        },
-        {
-          id: 2,
-          tipo: 'asociacion',
-          pregunta: 'Asocia la imagen con la seña correcta del número "15"',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_15.png',
-          opciones: [
-            { id: 1, texto: 'Número 15', correcta: true },
-            { id: 2, texto: 'Número 14', correcta: false },
-            { id: 3, texto: 'Número 16', correcta: false },
-            { id: 4, texto: 'Número 13', correcta: false }
-          ]
-        },
-        {
-          id: 3,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña para el número "8"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_8.png',
-          opciones: [
-            { id: 1, texto: 'Número 8', correcta: true },
-            { id: 2, texto: 'Número 7', correcta: false },
-            { id: 3, texto: 'Número 9', correcta: false },
-            { id: 4, texto: 'Número 6', correcta: false }
-          ]
-        }
-      ],
-      6: [ // Números Avanzados (16-30)
-        {
-          id: 1,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña correcta para el número "20"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_20.png',
-          opciones: [
-            { id: 1, texto: 'Número 20', correcta: true },
-            { id: 2, texto: 'Número 19', correcta: false },
-            { id: 3, texto: 'Número 21', correcta: false },
-            { id: 4, texto: 'Número 22', correcta: false }
-          ]
-        },
-        {
-          id: 2,
-          tipo: 'asociacion',
-          pregunta: 'Asocia la imagen con la seña correcta del número "25"',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_25.png',
-          opciones: [
-            { id: 1, texto: 'Número 25', correcta: true },
-            { id: 2, texto: 'Número 24', correcta: false },
-            { id: 3, texto: 'Número 26', correcta: false },
-            { id: 4, texto: 'Número 23', correcta: false }
-          ]
-        },
-        {
-          id: 3,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña para el número "30"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/numero_30.png',
-          opciones: [
-            { id: 1, texto: 'Número 30', correcta: true },
-            { id: 2, texto: 'Número 29', correcta: false },
-            { id: 3, texto: 'Número 28', correcta: false },
-            { id: 4, texto: 'Número 27', correcta: false }
-          ]
-        }
-      ],
-      // CORTESÍA (lecciones 7-9)
-      7: [ // Saludos Básicos
+      3: [ // Expresiones de cortesía
         {
           id: 1,
           tipo: 'opcion_multiple',
@@ -354,84 +183,8 @@ export default function EjerciciosLeccion({ route, navigation }) {
           ]
         }
       ],
-      8: [ // Conversación Diaria
-        {
-          id: 1,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña correcta para "¿Cómo estás?"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/como_estas.png',
-          opciones: [
-            { id: 1, texto: '¿Cómo estás?', correcta: true },
-            { id: 2, texto: '¿Qué tal?', correcta: false },
-            { id: 3, texto: '¿De dónde eres?', correcta: false },
-            { id: 4, texto: '¿Cuántos años tienes?', correcta: false }
-          ]
-        },
-        {
-          id: 2,
-          tipo: 'asociacion',
-          pregunta: 'Asocia la imagen con la seña correcta de "Mucho gusto"',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/mucho_gusto.png',
-          opciones: [
-            { id: 1, texto: 'Mucho gusto', correcta: true },
-            { id: 2, texto: 'Encantado', correcta: false },
-            { id: 3, texto: 'Gracias', correcta: false },
-            { id: 4, texto: 'De nada', correcta: false }
-          ]
-        },
-        {
-          id: 3,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña para "¿De dónde eres?"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/de_donde_eres.png',
-          opciones: [
-            { id: 1, texto: '¿De dónde eres?', correcta: true },
-            { id: 2, texto: '¿Dónde vives?', correcta: false },
-            { id: 3, texto: '¿Cómo estás?', correcta: false },
-            { id: 4, texto: '¿Qué tal?', correcta: false }
-          ]
-        }
-      ],
-      9: [ // Expresiones de Cortesía
-        {
-          id: 1,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña correcta para "Gracias"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/gracias.png',
-          opciones: [
-            { id: 1, texto: 'Gracias', correcta: true },
-            { id: 2, texto: 'De nada', correcta: false },
-            { id: 3, texto: 'Por favor', correcta: false },
-            { id: 4, texto: 'Disculpe', correcta: false }
-          ]
-        },
-        {
-          id: 2,
-          tipo: 'asociacion',
-          pregunta: 'Asocia la imagen con la seña correcta de "Por favor"',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/por_favor.png',
-          opciones: [
-            { id: 1, texto: 'Por favor', correcta: true },
-            { id: 2, texto: 'Gracias', correcta: false },
-            { id: 3, texto: 'De nada', correcta: false },
-            { id: 4, texto: 'Disculpe', correcta: false }
-          ]
-        },
-        {
-          id: 3,
-          tipo: 'opcion_multiple',
-          pregunta: '¿Cuál es la seña para "Disculpe"?',
-          imagen: 'https://res.cloudinary.com/dz2qmueau/image/upload/v1759129044/disculpe.png',
-          opciones: [
-            { id: 1, texto: 'Disculpe', correcta: true },
-            { id: 2, texto: 'Lo siento', correcta: false },
-            { id: 3, texto: 'Gracias', correcta: false },
-            { id: 4, texto: 'De nada', correcta: false }
-          ]
-        }
-      ],
-      // COLORES (lecciones 10-12)
-      10: [ // Colores Primarios
+      // COLORES (lecciones 4)
+      4: [ // Colores Primarios
         {
           id: 1,
           tipo: 'opcion_multiple',
@@ -1203,15 +956,15 @@ export default function EjerciciosLeccion({ route, navigation }) {
   // Función para obtener la siguiente lección según el orden especificado
   const obtenerSiguienteLeccion = () => {
     const ordenLecciones = [
-      'Abecedario Básico', 'Abecedario Intermedio', 'Abecedario Avanzado',
-      'Números Básicos', 'Números Intermedios', 'Números Avanzados',
-      'Saludos Básicos', 'Conversación Diaria', 'Expresiones de Cortesía',
-      'Colores Primarios', 'Colores Secundarios', 'Colores Especiales',
-      'Familia Inmediata', 'Familia Extendida', 'Relaciones Familiares',
-      'Lugares Comunes', 'Lugares Públicos', 'Lugares Especiales',
-      'Frutas Tropicales', 'Frutas de Temporada', 'Frutas Exóticas',
-      'Verduras Básicas', 'Verduras de Hoja', 'Verduras de Raíz',
-      'Días Básicos', 'Meses del Año', 'Tiempo y Estaciones'
+      'Abecedario Básico',
+      'Números Básicos',
+      'Expresiones de Cortesía',
+      'Colores Básicos',
+      'Familia Básica',
+      'Lugares Comunes',
+      'Frutas Tropicales',
+      'Verduras Básicas',
+      'Días de la Semana'
     ];
 
     const indiceActual = ordenLecciones.indexOf(nombreLeccion);
