@@ -922,10 +922,16 @@ export default function EjerciciosLeccion({ route, navigation }) {
   const guardarProgreso = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const porcentajeEjercicios = Math.round((puntuacion / (ejercicios.length * 10)) * 100);
-      const porcentajeFinal = 100; // La lección se completa al 100% cuando termina los ejercicios
+      // Calcular el porcentaje basado en las respuestas correctas
+      const respuestasCorrectas = Math.floor(puntuacion / 10);
+      const porcentajeReal = Math.round((respuestasCorrectas / ejercicios.length) * 100);
       
-      console.log('Guardando progreso final:', { leccionId, porcentajeEjercicios, porcentajeFinal });
+      console.log('Guardando progreso final:', { 
+        leccionId, 
+        respuestasCorrectas, 
+        totalEjercicios: ejercicios.length,
+        porcentajeReal 
+      });
       
       await fetch(`${API_BASE_URL}/progreso`, {
         method: 'POST',
@@ -935,11 +941,11 @@ export default function EjerciciosLeccion({ route, navigation }) {
         },
         body: JSON.stringify({
           leccionId: leccionId,
-          porcentaje: porcentajeFinal
+          porcentaje: porcentajeReal
         }),
       });
       
-      console.log('Progreso final guardado al 100%');
+      console.log(`Progreso final guardado: ${porcentajeReal}% (${respuestasCorrectas}/${ejercicios.length} correctas)`);
     } catch (error) {
       console.error('Error al guardar progreso:', error);
     }
@@ -1030,7 +1036,15 @@ export default function EjerciciosLeccion({ route, navigation }) {
             <FontAwesome name={iconoResultado} size={80} color={colorResultado} />
             <Text style={estilos.tituloResultado}>{mensajeFelicitacion}</Text>
             <Text style={estilos.subtituloResultado}>{nombreLeccion}</Text>
-            <Text style={estilos.mensajeCompletado}>¡Has completado completamente esta lección! 🎓</Text>
+            <Text style={estilos.mensajeCompletado}>
+              {porcentaje >= 90 
+                ? '¡Has dominado esta lección! 🎓' 
+                : porcentaje >= 70 
+                ? '¡Buen trabajo en esta lección! 📚' 
+                : porcentaje >= 50 
+                ? 'Has completado la lección, ¡sigue practicando! 📖'
+                : 'Lección completada. Te recomendamos repetirla para mejorar. 💪'}
+            </Text>
             
             <View style={estilos.estadisticasContainer}>
               <View style={estilos.estadisticaItem}>

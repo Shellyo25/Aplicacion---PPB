@@ -636,8 +636,15 @@ app.get('/api/estadisticas', authenticateToken, async (req, res) => {
 
     const totalLecciones = await pool.execute('SELECT COUNT(*) as total FROM Tbl_lecciones');
     const leccionesCompletadas = progreso.filter(p => p.Porcen_Av >= 100).length;
-    const progresoGeneral = totalLecciones[0][0].total > 0 ? 
-      (leccionesCompletadas / totalLecciones[0][0].total) * 100 : 0;
+    
+    // Calcular progreso general basado en el promedio de porcentajes de todas las lecciones
+    let progresoGeneral = 0;
+    if (progreso.length > 0) {
+      const sumaProgresos = progreso.reduce((sum, p) => sum + p.Porcen_Av, 0);
+      const promedioLeccionesRealizadas = sumaProgresos / progreso.length;
+      // Ponderar por el número total de lecciones
+      progresoGeneral = (promedioLeccionesRealizadas * progreso.length) / totalLecciones[0][0].total;
+    }
 
     res.json({
       progresoGeneral: Math.round(progresoGeneral),
