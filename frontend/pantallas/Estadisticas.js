@@ -13,6 +13,14 @@ export default function Estadisticas({ navigation }) {
     cargarEstadisticas();
   }, []);
 
+  // Recargar estadísticas cuando se regresa a esta pantalla
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      cargarEstadisticas();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const cargarEstadisticas = async () => {
     try {
       const token = await AsyncStorage.getItem('token');

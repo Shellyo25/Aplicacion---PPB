@@ -551,9 +551,13 @@ app.get('/api/lecciones', authenticateToken, async (req, res) => {
     const leccionesConProgreso = lecciones.map(leccion => {
       const progresoActual = progresoMap[leccion.Pk_ID_leccion] || 0;
       const progresoAnterior = progresoMap[leccion.Pk_ID_leccion - 1] || 0;
-      const desbloqueada = leccion.Pk_ID_leccion === 1 || progresoAnterior >= 100;
+      const desbloqueada = leccion.Pk_ID_leccion === 1 || progresoAnterior >= 80;
       
-      console.log(`Lección ${leccion.Pk_ID_leccion} (${leccion.Nombre}): progreso=${progresoActual}%, anterior=${progresoAnterior}%, desbloqueada=${desbloqueada}`);
+      console.log(`=== LECCIÓN ${leccion.Pk_ID_leccion} (${leccion.Nombre}) ===`);
+      console.log(`Progreso actual: ${progresoActual}%`);
+      console.log(`Progreso anterior: ${progresoAnterior}%`);
+      console.log(`Desbloqueada: ${desbloqueada}`);
+      console.log(`Condición: ${leccion.Pk_ID_leccion === 1 ? 'Primera lección' : `Anterior >= 80% (${progresoAnterior} >= 80)`}`);
       
       return {
         ...leccion,
@@ -589,9 +593,11 @@ app.post('/api/progreso', authenticateToken, async (req, res) => {
   try {
     const { leccionId, porcentaje } = req.body;
 
-    console.log(`Guardando progreso: usuario=${req.user.userId}, leccion=${leccionId}, porcentaje=${porcentaje}%`);
+    console.log(`=== BACKEND: Guardando progreso ===`);
+    console.log(`Usuario: ${req.user.userId}, Lección: ${leccionId}, Porcentaje: ${porcentaje}%`);
 
     if (!leccionId || porcentaje < 0 || porcentaje > 100) {
+      console.log(`❌ Datos inválidos: leccionId=${leccionId}, porcentaje=${porcentaje}`);
       return res.status(400).json({ error: 'Datos de progreso inválidos' });
     }
 
@@ -607,13 +613,13 @@ app.post('/api/progreso', authenticateToken, async (req, res) => {
         'UPDATE Tbl_Progreso SET Porcen_Av = ? WHERE Fk_ID_usuario = ? AND Fk_leccion = ?',
         [porcentaje, req.user.userId, leccionId]
       );
-      console.log(`Progreso actualizado: ${porcentaje}% para lección ${leccionId}`);
+      console.log(`✅ Progreso ACTUALIZADO: ${porcentaje}% para lección ${leccionId}`);
     } else {
       await pool.execute(
         'INSERT INTO Tbl_Progreso (Fk_ID_usuario, Fk_leccion, Porcen_Av) VALUES (?, ?, ?)',
         [req.user.userId, leccionId, porcentaje]
       );
-      console.log(`Progreso insertado: ${porcentaje}% para lección ${leccionId}`);
+      console.log(`✅ Progreso INSERTADO: ${porcentaje}% para lección ${leccionId}`);
     }
 
     res.json({ message: 'Progreso guardado exitosamente' });

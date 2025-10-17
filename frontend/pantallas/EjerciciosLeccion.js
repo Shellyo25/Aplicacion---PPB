@@ -898,42 +898,56 @@ export default function EjerciciosLeccion({ route, navigation }) {
 
     setMostrarResultado(true);
     
-    if (respuestaSeleccionada.correcta) {
-      setPuntuacion(puntuacion + 10);
-    }
+    // Actualizar puntuación de forma síncrona
+    const nuevaPuntuacion = respuestaSeleccionada.correcta ? puntuacion + 10 : puntuacion;
+    setPuntuacion(nuevaPuntuacion);
     
     // Automáticamente pasar al siguiente ejercicio después de 2 segundos
     setTimeout(() => {
-      siguienteEjercicio();
+      siguienteEjercicio(nuevaPuntuacion);
     }, 2000);
   };
 
-  const siguienteEjercicio = () => {
+  const siguienteEjercicio = (puntuacionActual = null) => {
     if (ejercicioActual < ejercicios.length - 1) {
       setEjercicioActual(ejercicioActual + 1);
       setRespuestaSeleccionada(null);
       setMostrarResultado(false);
     } else {
       setEjercicioCompletado(true);
-      guardarProgreso();
+      // Usar la puntuación actual si se proporciona, sino usar el estado
+      const puntuacionFinal = puntuacionActual !== null ? puntuacionActual : puntuacion;
+      guardarProgreso(puntuacionFinal);
     }
   };
 
-  const guardarProgreso = async () => {
+  const guardarProgreso = async (puntuacionFinal = null) => {
     try {
       const token = await AsyncStorage.getItem('token');
-      // Calcular el porcentaje basado en las respuestas correctas
-      const respuestasCorrectas = Math.floor(puntuacion / 10);
-      const porcentajeReal = Math.round((respuestasCorrectas / ejercicios.length) * 100);
       
-      console.log('Guardando progreso final:', { 
-        leccionId, 
-        respuestasCorrectas, 
-        totalEjercicios: ejercicios.length,
-        porcentajeReal 
-      });
+      // Usar la puntuación proporcionada o el estado actual
+      const puntuacionActual = puntuacionFinal !== null ? puntuacionFinal : puntuacion;
       
-      await fetch(`${API_BASE_URL}/progreso`, {
+      // Calcular respuestas correctas de manera más simple y robusta
+      const respuestasCorrectas = Math.floor(puntuacionActual / 10);
+      let porcentajeReal;
+      
+      // Si todas las respuestas son correctas, forzar 100%
+      if (respuestasCorrectas === ejercicios.length) {
+        porcentajeReal = 100;
+      } else {
+        // Para otros casos, calcular normalmente
+        porcentajeReal = Math.round((respuestasCorrectas / ejercicios.length) * 100);
+      }
+      
+      console.log('=== GUARDANDO PROGRESO ===');
+      console.log('Puntuación total:', puntuacionActual);
+      console.log('Respuestas correctas:', respuestasCorrectas);
+      console.log('Total ejercicios:', ejercicios.length);
+      console.log('Porcentaje calculado:', porcentajeReal);
+      console.log('Lección ID:', leccionId);
+      
+      const response = await fetch(`${API_BASE_URL}/progreso`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -945,18 +959,47 @@ export default function EjerciciosLeccion({ route, navigation }) {
         }),
       });
       
-      console.log(`Progreso final guardado: ${porcentajeReal}% (${respuestasCorrectas}/${ejercicios.length} correctas)`);
+      if (response.ok) {
+        console.log(`✅ Progreso guardado exitosamente: ${porcentajeReal}%`);
+        
+        // Si se completó al 100%, mostrar mensaje de éxito
+        if (porcentajeReal === 100) {
+          console.log('🎉 ¡Lección completada al 100%! La siguiente lección debería desbloquearse.');
+        }
+      } else {
+        console.error('❌ Error al guardar progreso:', response.status);
+      }
+      
     } catch (error) {
-      console.error('Error al guardar progreso:', error);
+      console.error('❌ Error al guardar progreso:', error);
     }
   };
 
-  const reiniciarEjercicios = () => {
+  const reiniciarEjercicios = async () => {
     setEjercicioActual(0);
     setRespuestaSeleccionada(null);
     setPuntuacion(0);
     setMostrarResultado(false);
     setEjercicioCompletado(false);
+    
+    // Resetear el progreso en la base de datos también
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await fetch(`${API_BASE_URL}/progreso`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          leccionId: leccionId,
+          porcentaje: 0
+        }),
+      });
+      console.log('Progreso reseteado a 0% para reiniciar ejercicios');
+    } catch (error) {
+      console.error('Error al resetear progreso:', error);
+    }
   };
 
   // Función para obtener la siguiente lección según el orden especificado

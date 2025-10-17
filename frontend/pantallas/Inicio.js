@@ -14,6 +14,14 @@ export default function Inicio({ navigation }) {
     cargarDatosUsuario();
   }, []);
 
+  // Recargar datos cuando se regresa a esta pantalla
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      cargarDatosUsuario();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const cargarDatosUsuario = async () => {
     try {
       const userDataString = await AsyncStorage.getItem('userData');

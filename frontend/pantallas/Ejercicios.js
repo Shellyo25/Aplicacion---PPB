@@ -103,7 +103,12 @@ export default function Ejercicios({ navigation }) {
   const guardarProgreso = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const porcentaje = Math.round((puntuacion / (ejercicios.length * 10)) * 100);
+      let porcentaje = Math.round((puntuacion / (ejercicios.length * 10)) * 100);
+      
+      // Si todas las respuestas son correctas, asegurar que sea exactamente 100%
+      if (puntuacion === ejercicios.length * 10) {
+        porcentaje = 100;
+      }
       
       await fetch(`${API_BASE_URL}/progreso`, {
         method: 'POST',
@@ -121,12 +126,31 @@ export default function Ejercicios({ navigation }) {
     }
   };
 
-  const reiniciarEjercicios = () => {
+  const reiniciarEjercicios = async () => {
     setEjercicioActual(0);
     setRespuestaSeleccionada(null);
     setPuntuacion(0);
     setMostrarResultado(false);
     setEjercicioCompletado(false);
+    
+    // Resetear el progreso en la base de datos también
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await fetch(`${API_BASE_URL}/progreso`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          leccionId: 1, // ID por defecto para ejercicios generales
+          porcentaje: 0
+        }),
+      });
+      console.log('Progreso reseteado a 0% para reiniciar ejercicios');
+    } catch (error) {
+      console.error('Error al resetear progreso:', error);
+    }
   };
 
   if (loading) {

@@ -42,7 +42,7 @@ export default function Lecciones({ navigation }) {
         // Agregar información de desbloqueo y progreso
         const leccionesConEstado = data.lecciones.map((leccion, index) => ({
           ...leccion,
-          desbloqueada: index === 0 || (index > 0 && data.lecciones[index - 1].progreso >= 100),
+          desbloqueada: index === 0 || (index > 0 && data.lecciones[index - 1].progreso >= 80),
           progreso: leccion.progreso || 0
         }));
         setLecciones(leccionesConEstado);
