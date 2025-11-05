@@ -631,6 +631,19 @@ app.post('/api/progreso', authenticateToken, async (req, res) => {
 
 app.get('/api/estadisticas', authenticateToken, async (req, res) => {
   try {
+    // Obtener todas las lecciones con LEFT JOIN para incluir las que no tienen progreso
+    const [todasLecciones] = await pool.execute(
+      `SELECT 
+        l.Pk_ID_leccion,
+        l.Nombre, 
+        COALESCE(p.Porcen_Av, 0) as Porcen_Av
+       FROM Tbl_lecciones l
+       LEFT JOIN Tbl_Progreso p ON l.Pk_ID_leccion = p.Fk_leccion AND p.Fk_ID_usuario = ?
+       ORDER BY l.Pk_ID_leccion`,
+      [req.user.userId]
+    );
+
+    // Obtener solo las lecciones con progreso para el detalle (sin mostrar las de 0%)
     const [progreso] = await pool.execute(
       `SELECT l.Nombre, p.Porcen_Av 
        FROM Tbl_Progreso p 
@@ -640,22 +653,39 @@ app.get('/api/estadisticas', authenticateToken, async (req, res) => {
       [req.user.userId]
     );
 
-    const totalLecciones = await pool.execute('SELECT COUNT(*) as total FROM Tbl_lecciones');
-    const leccionesCompletadas = progreso.filter(p => p.Porcen_Av >= 100).length;
+    const totalLecciones = todasLecciones.length;
     
-    // Calcular progreso general basado en el promedio de porcentajes de todas las lecciones
+    // Convertir Porcen_Av a número y calcular
+    let sumaProgresos = 0;
+    let leccionesCompletadas = 0;
+    
+    todasLecciones.forEach(leccion => {
+      const porcentaje = parseFloat(leccion.Porcen_Av) || 0;
+      sumaProgresos += porcentaje;
+      if (porcentaje >= 100) {
+        leccionesCompletadas++;
+      }
+    });
+    
+    // Calcular progreso general: suma de todos los porcentajes dividido por el total de lecciones (9)
     let progresoGeneral = 0;
-    if (progreso.length > 0) {
-      const sumaProgresos = progreso.reduce((sum, p) => sum + p.Porcen_Av, 0);
-      const promedioLeccionesRealizadas = sumaProgresos / progreso.length;
-      // Ponderar por el número total de lecciones
-      progresoGeneral = (promedioLeccionesRealizadas * progreso.length) / totalLecciones[0][0].total;
+    if (totalLecciones > 0) {
+      progresoGeneral = sumaProgresos / totalLecciones;
     }
 
+    // Asegurar que el valor sea un número entero entre 0 y 100
+    progresoGeneral = Math.max(0, Math.min(100, Math.round(progresoGeneral)));
+
+    console.log(`=== ESTADÍSTICAS ===`);
+    console.log(`Total lecciones: ${totalLecciones}`);
+    console.log(`Suma de progresos: ${sumaProgresos}`);
+    console.log(`Progreso general: ${progresoGeneral}%`);
+    console.log(`Lecciones completadas: ${leccionesCompletadas}`);
+
     res.json({
-      progresoGeneral: Math.round(progresoGeneral),
-      leccionesCompletadas,
-      totalLecciones: totalLecciones[0][0].total,
+      progresoGeneral: progresoGeneral,
+      leccionesCompletadas: leccionesCompletadas,
+      totalLecciones: totalLecciones,
       detalleProgreso: progreso
     });
   } catch (error) {

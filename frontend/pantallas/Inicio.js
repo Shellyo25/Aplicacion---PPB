@@ -89,12 +89,18 @@ export default function Inicio({ navigation }) {
           <View style={estilos.cardsContainer}>
             <View style={estilos.card}>
               <FontAwesome name="trophy" size={30} color="#fb8500" />
-              <Text style={estilos.cardNumero}>{estadisticas.progresoGeneral}%</Text>
+              <Text style={estilos.cardNumero}>
+                {estadisticas.progresoGeneral !== undefined && estadisticas.progresoGeneral !== null 
+                  ? `${estadisticas.progresoGeneral}%` 
+                  : '0%'}
+              </Text>
               <Text style={estilos.cardTexto}>Progreso General</Text>
             </View>
             <View style={estilos.card}>
               <FontAwesome name="check-circle" size={30} color="#4CAF50" />
-              <Text style={estilos.cardNumero}>{estadisticas.leccionesCompletadas}</Text>
+              <Text style={estilos.cardNumero}>
+                {estadisticas.leccionesCompletadas !== undefined ? estadisticas.leccionesCompletadas : 0}
+              </Text>
               <Text style={estilos.cardTexto}>Lecciones Completadas</Text>
             </View>
           </View>
