@@ -33,6 +33,12 @@ const dbConfig = {
   queueLimit: 0
 };
 
+if (process.env.DB_SSL === 'true') {
+  dbConfig.ssl = {
+    rejectUnauthorized: false
+  };
+}
+
 const pool = mysql.createPool(dbConfig);
 
 (async () => {
@@ -718,38 +724,174 @@ app.post('/api/recuperar-password', async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    if (transporter) {
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-      to: correo,
-      subject: 'Recuperación de contraseña - LENSEGUA',
-      html: `
-        <h2>Recuperación de contraseña</h2>
-        <p>Hola ${user.Nombre},</p>
-        <p>Has solicitado recuperar tu contraseña. Usa el siguiente enlace para crear una nueva contraseña:</p>
-        <p><a href="https://tu-app.com/reset-password?token=${resetToken}">Restablecer contraseña</a></p>
-        <p>Este enlace expirará en 1 hora.</p>
-        <p>Si no solicitaste este cambio, ignora este correo.</p>
-        <br>
-        <p>El equipo de LENSEGUA</p>
-      `
-    };
+    const protocol = req.protocol === 'https' ? 'https' : 'http';
+    const host = req.get('host');
+    const resetLink = `${protocol}://${host}/reset-password?token=${resetToken}`;
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error al enviar correo:', error);
-        return res.status(500).json({ error: 'Error al enviar correo' });
-      } else {
-        console.log('Correo de recuperación enviado exitosamente');
-        res.json({ message: 'Correo de recuperación enviado' });
-      }
-    });
+    if (transporter) {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: correo,
+        subject: 'Recuperación de contraseña - LENSEGUA',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <h2 style="color: #023047; text-align: center;">Recuperación de contraseña</h2>
+            <p>Hola <strong>${user.Nombre}</strong>,</p>
+            <p>Has solicitado recuperar tu contraseña. Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="background-color: #fb8500; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Restablecer contraseña</a>
+            </div>
+            <p style="color: #666;">O copia y pega este enlace en tu navegador:</p>
+            <p style="color: #666; font-size: 12px; word-break: break-all;">${resetLink}</p>
+            <p style="color: #d9534f; font-size: 14px;">Este enlace expirará en 1 hora.</p>
+            <p style="font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo sin ningún problema.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="text-align: center; color: #888; font-size: 12px;">El equipo de LENSEGUA</p>
+          </div>
+        `
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error al enviar correo:', error);
+          return res.status(500).json({ error: 'Error al enviar correo' });
+        } else {
+          console.log('Correo de recuperación enviado exitosamente');
+          res.json({ message: 'Correo de recuperación enviado' });
+        }
+      });
     } else {
       res.status(503).json({ error: 'Servicio de correo no disponible' });
     }
 
   } catch (error) {
     console.error('Error en recuperación:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.get('/reset-password', (req, res) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.status(400).send('<h3>Enlace inválido. Falta el token de seguridad.</h3>');
+  }
+  
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Restablecer Contraseña - LENSEGUA</title>
+      <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f0f4f8; }
+        .container { background: white; padding: 40px 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 380px; box-sizing: border-box; }
+        h2 { color: #023047; text-align: center; margin-top: 0; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px 15px; margin: 10px 0; border: 1px solid #ced4da; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; transition: border-color 0.3s; }
+        input:focus { border-color: #219ebc; }
+        button { width: 100%; padding: 14px; background: linear-gradient(45deg, #fb8500, #ff9f1c); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 15px; transition: opacity 0.3s; }
+        button:hover { opacity: 0.9; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .message { text-align: center; margin-top: 20px; color: #d9534f; font-size: 14px; font-weight: 500; }
+        .success { color: #28a745; font-size: 16px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h2>Nueva Contraseña</h2>
+        <form id="resetForm">
+          <input type="password" id="password" placeholder="Nueva contraseña (mín. 8 caracteres)" required>
+          <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
+          <button type="submit" id="submitBtn">Cambiar Contraseña</button>
+          <div id="message" class="message"></div>
+        </form>
+      </div>
+      <script>
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
+          const msgDiv = document.getElementById('message');
+          const btn = document.getElementById('submitBtn');
+          
+          if(password.length < 8) {
+            msgDiv.textContent = 'La contraseña debe tener al menos 8 caracteres.';
+            return;
+          }
+          if(password !== confirmPassword) {
+            msgDiv.textContent = 'Las contraseñas no coinciden.';
+            return;
+          }
+          
+          const token = new URLSearchParams(window.location.search).get('token');
+          
+          btn.disabled = true;
+          btn.textContent = 'Guardando...';
+          msgDiv.textContent = '';
+          
+          try {
+            const response = await fetch('/api/reset-password-web', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token, newPassword: password })
+            });
+            const data = await response.json();
+            
+            if(response.ok) {
+              msgDiv.className = 'message success';
+              msgDiv.innerHTML = '¡Contraseña actualizada con éxito!<br><br>Ya puedes cerrar esta ventana y volver a LENSEGUA para iniciar sesión.';
+              document.getElementById('resetForm').style.display = 'none';
+            } else {
+              msgDiv.className = 'message';
+              msgDiv.textContent = data.error || 'Hubo un error al restablecer la contraseña.';
+              btn.disabled = false;
+              btn.textContent = 'Cambiar Contraseña';
+            }
+          } catch (err) {
+            msgDiv.className = 'message';
+            msgDiv.textContent = 'Error de conexión con el servidor.';
+            btn.disabled = false;
+            btn.textContent = 'Cambiar Contraseña';
+          }
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+app.post('/api/reset-password-web', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: 'Token y nueva contraseña son requeridos' });
+    }
+
+    if (!validatePassword(newPassword)) {
+      return res.status(400).json({ 
+        error: 'La contraseña debe tener al menos 8 caracteres con números y letras' 
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'tu-secreto-jwt');
+    } catch (err) {
+      return res.status(400).json({ error: 'El enlace es inválido o ha expirado' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await pool.execute(
+      'UPDATE Tbl_usuarios SET Contrasena = ? WHERE Pk_ID_usuario = ?',
+      [hashedPassword, decoded.userId]
+    );
+
+    res.json({ message: 'Contraseña actualizada exitosamente' });
+
+  } catch (error) {
+    console.error('Error al restablecer contraseña:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -1102,6 +1244,6 @@ app.delete('/api/eliminar-cuenta', authenticateToken, async (req, res) => {
 });
 
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
