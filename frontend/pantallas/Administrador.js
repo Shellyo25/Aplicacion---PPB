@@ -14,16 +14,16 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://aplicacion-lensegua-backend.onrender.com/api';
 
-export default function Administrador({ navigation }) {
+export default function Administrador({ route, navigation }) {
   const [userData, setUserData] = useState(null);
   const [estadisticas, setEstadisticas] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
   const [progreso, setProgreso] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(route.params?.tab || 'dashboard');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [nuevoRol, setNuevoRol] = useState('usuario');

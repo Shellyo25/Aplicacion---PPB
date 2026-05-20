@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useContext } from 'react';
+import { TemaApp } from '../TemaApp';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,7 +29,9 @@ export default function Configuracion({ navigation }) {
     modoOscuro: false,
     idioma: 'es',
     recordarSesion: true
+    
   });
+  const esModoOscuro = configuraciones.modoOscuro;
   const [esAdmin, setEsAdmin] = useState(false);
   const [modalEditarPerfil, setModalEditarPerfil] = useState(false);
   const [modalCambiarContrasena, setModalCambiarContrasena] = useState(false);
@@ -102,70 +106,37 @@ export default function Configuracion({ navigation }) {
     }
   };
 
-  const cerrarSesion = async () => {
-    console.log('cerrarSesion llamado'); // Debug
-    Alert.alert(
-      '🚪 Cerrar Sesión',
-      `Hola ${userData?.nombre || 'Usuario'}, ¿estás seguro de que quieres cerrar sesión?\n\nDespués tendrás que:\n• Iniciar sesión nuevamente\n• Verificar tu usuario y contraseña\n\nTu progreso se mantendrá guardado.`, 
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Cerrar Sesión', 
-          style: 'destructive',
-          onPress: async () => {
-            console.log('Confirmación de cerrar sesión aceptada'); // Debug
-            try {
-              setCargando(true);
-              
-              // Mostrar mensaje de despedida
-              Alert.alert(
-                '👋 ¡Hasta luego!',
-                `Gracias por usar LENSEGUA, ${userData?.nombre || 'Usuario'}.\n\nTu progreso está guardado y podrás continuar cuando regreses.\n\n¡Sigue practicando lengua de señas! 🤟`, 
-                [
-                  {
-                    text: 'Finalizar',
-                    onPress: async () => {
-                      console.log('Iniciando proceso de cerrar sesión...'); // Debug
-                      try {
-                        // Limpiar datos de sesión
-                        await AsyncStorage.removeItem('token');
-                        await AsyncStorage.removeItem('userData');
-                        
-                        // Si no quiere recordar sesión, también limpiar configuraciones
-                        if (!configuraciones.recordarSesion) {
-                          await AsyncStorage.removeItem('configuraciones');
-                          console.log('Configuraciones limpiadas (recordarSesion = false)');
-                        } else {
-                          console.log('Configuraciones mantenidas (recordarSesion = true)');
-                        }
-                        
-                        console.log('Navegando a Bienvenida...'); // Debug
-                        navigation.navigate('Bienvenida');
-                      } catch (error) {
-                        console.error('Error al limpiar datos:', error);
-                        Alert.alert('❌ Error', 'Error al cerrar sesión. Intenta nuevamente.');
-                      }
-                    }
-                  }
-                ]
-              );
-            } catch (error) {
-              console.error('Error en cerrar sesión:', error);
-              Alert.alert('❌ Error', 'Error al cerrar sesión. Intenta nuevamente.');
-            } finally {
-              setCargando(false);
-            }
-          }
-        }
-      ]
-    );
+const cerrarSesion = (conConfirmacion = false) => {
+
+  const ejecutarLogout = async () => {
+    try {
+      await AsyncStorage.clear();
+
+      navigation.navigate('Bienvenida');
+
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo cerrar sesión');
+    }
   };
 
+  if (conConfirmacion) {
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro que deseas cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Sí, salir', style: 'destructive', onPress: ejecutarLogout }
+      ]
+    );
+  } else {
+    ejecutarLogout();
+  }
+};
   const eliminarCuenta = () => {
     console.log('eliminarCuenta llamado'); // Debug
     Alert.alert(
-      '🗑️ Eliminar Cuenta',
-      '⚠️ ADVERTENCIA IMPORTANTE:\n\nEsta acción eliminará PERMANENTEMENTE:\n• Tu cuenta de usuario\n• Todo tu progreso de lecciones\n• Tus estadísticas y logros\n• Acceso a la aplicación\n\nEsta acción NO se puede deshacer.\n\n¿Estás completamente seguro de continuar?',
+      'Eliminar Cuenta',
+      'ADVERTENCIA IMPORTANTE:\n\nEsta acción eliminará PERMANENTEMENTE:\n• Tu cuenta de usuario\n• Todo tu progreso de lecciones\n• Tus estadísticas y logros\n• Acceso a la aplicación\n\nEsta acción NO se puede deshacer.\n\n¿Estás completamente seguro de continuar?',
       [
         { text: 'Cancelar', style: 'cancel' },
         { 
@@ -175,7 +146,7 @@ export default function Configuracion({ navigation }) {
             console.log('Primera confirmación aceptada'); // Debug
             // Segunda confirmación
             Alert.alert(
-              '🔴 CONFIRMACIÓN FINAL',
+              'CONFIRMACIÓN FINAL',
               `Usuario: ${userData?.usuario || 'N/A'}\nCorreo: ${userData?.correo || 'N/A'}\n\n¿Estás 100% seguro de eliminar esta cuenta?`, 
               [
                 { text: 'Cancelar', style: 'cancel' },
@@ -195,7 +166,7 @@ export default function Configuracion({ navigation }) {
                       }
 
                       console.log('Enviando petición al servidor...'); // Debug
-                      const response = await fetch('http://localhost:3000/api/eliminar-cuenta', {
+                      const response = await fetch('https://aplicacion-lensegua-backend.onrender.com/api/eliminar-cuenta', {
                         method: 'DELETE',
                         headers: {
                           'Authorization': `Bearer ${token}`,
@@ -213,7 +184,7 @@ export default function Configuracion({ navigation }) {
                         await AsyncStorage.removeItem('progresoLocal');
                         
                         Alert.alert(
-                          '✅ Cuenta Eliminada',
+                          'Cuenta Eliminada',
                           'Tu cuenta ha sido eliminada exitosamente.\n\nGracias por haber sido parte de la comunidad LENSEGUA. Esperamos verte de nuevo en el futuro.\n\n¡Que tengas un excelente día! 👋',
                           [
                             {
@@ -225,11 +196,11 @@ export default function Configuracion({ navigation }) {
                       } else {
                         const error = await response.json();
                         console.error('Error del servidor:', error); // Debug
-                        Alert.alert('❌ Error', error.error || 'No se pudo eliminar la cuenta. Intenta nuevamente.');
+                        Alert.alert('Error', error.error || 'No se pudo eliminar la cuenta. Intenta nuevamente.');
                       }
                     } catch (error) {
                       console.error('Error al eliminar cuenta:', error);
-                      Alert.alert('❌ Error', 'Ocurrió un error al eliminar la cuenta. Verifica tu conexión e intenta nuevamente.');
+                      Alert.alert('Error', 'Ocurrió un error al eliminar la cuenta. Verifica tu conexión e intenta nuevamente.');
                     } finally {
                       setCargando(false);
                     }
@@ -263,7 +234,7 @@ export default function Configuracion({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/soporte', {
+      const response = await fetch('https://aplicacion-lensegua-backend.onrender.com/api/soporte', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -280,7 +251,7 @@ export default function Configuracion({ navigation }) {
         setModalSoporte(false);
         setFormularioSoporte({ tipo: '', asunto: '', mensaje: '' });
         Alert.alert(
-          '✅ Mensaje Enviado',
+          'Mensaje Enviado',
           'Tu mensaje ha sido enviado exitosamente a nuestro equipo de soporte.\n\nTe responderemos en un plazo de 24 horas.\n\n¡Gracias por contactarnos!'
         );
       } else {
@@ -298,7 +269,7 @@ export default function Configuracion({ navigation }) {
   const limpiarDatos = () => {
     Alert.alert(
       'Limpiar Datos de la App',
-      '⚠️ Esto eliminará:\n\n• Todas las configuraciones guardadas\n• Datos de progreso local\n• Preferencias de la app\n\n¿Estás seguro de continuar?',
+      'Esto eliminará:\n\n• Todas las configuraciones guardadas\n• Datos de progreso local\n• Preferencias de la app\n\n¿Estás seguro de continuar?',
       [
         { text: 'Cancelar', style: 'cancel' },
         { 
@@ -344,7 +315,7 @@ export default function Configuracion({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/perfil', {
+      const response = await fetch('https://aplicacion-lensegua-backend.onrender.com/api/perfil', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -404,7 +375,7 @@ export default function Configuracion({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/cambiar-contrasena', {
+      const response = await fetch('https://aplicacion-lensegua-backend.onrender.com/api/cambiar-contrasena', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -436,6 +407,7 @@ export default function Configuracion({ navigation }) {
     <Animated.View 
       style={[
         estilos.configItem,
+        { backgroundColor: esModoOscuro ? '#1e1e1e' : '#fff' },
         {
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }]
@@ -469,11 +441,19 @@ export default function Configuracion({ navigation }) {
   );
 
   return (
-    <ScrollView style={estilos.contenedor}>
+    <ScrollView
+  style={[
+    estilos.contenedor,
+    { backgroundColor: esModoOscuro ? '#121212' : '#f8f9fa' }
+  ]}
+>
       {/* Header con perfil */}
       <Animated.View 
         style={[
           estilos.header,
+          {
+            backgroundColor: esModoOscuro ? '#1e1e1e' : '#fff'
+          },
           {
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }]
@@ -485,7 +465,7 @@ export default function Configuracion({ navigation }) {
           style={estilos.avatar}
         />
         <View style={estilos.perfilInfo}>
-          <Text style={estilos.nombreUsuario}>{userData?.nombre || 'Usuario'} {userData?.apellido || ''}</Text>
+          <Text style={[estilos.nombreUsuario, { color: esModoOscuro ? '#fff' : '#023047' }]}>{userData?.nombre || 'Usuario'} {userData?.apellido || ''}</Text>
           <Text style={estilos.correoUsuario}>{userData?.correo || 'usuario@ejemplo.com'}</Text>
           <Text style={estilos.usuarioText}>@{userData?.usuario || 'usuario'}</Text>
           {esAdmin && (
@@ -509,15 +489,7 @@ export default function Configuracion({ navigation }) {
       >
         <Text style={estilos.seccionTitulo}>Configuración de la App</Text>
         
-        <ConfiguracionItem
-          icono="bell"
-          titulo="Notificaciones"
-          descripcion="Recibir notificaciones de progreso"
-          tipo="switch"
-          valor={configuraciones.notificaciones}
-          onPress={() => guardarConfiguracion('notificaciones', !configuraciones.notificaciones)}
-          color="#28a745"
-        />
+
         
         <ConfiguracionItem
           icono="mobile"
@@ -599,7 +571,7 @@ export default function Configuracion({ navigation }) {
             titulo="Gestionar Usuarios"
             descripcion="Ver y administrar usuarios"
             tipo="navegacion"
-            onPress={() => navigation.navigate('Administrador')}
+            onPress={() => navigation.navigate('Administrador', { tab: 'usuarios' })}
             color="#dc3545"
           />
           
@@ -617,7 +589,7 @@ export default function Configuracion({ navigation }) {
             titulo="Estadísticas Generales"
             descripcion="Ver estadísticas de todos los usuarios"
             tipo="navegacion"
-            onPress={() => navigation.navigate('Administrador')}
+            onPress={() => navigation.navigate('Administrador', { tab: 'progreso' })}
             color="#6f42c1"
           />
         </Animated.View>
@@ -634,15 +606,6 @@ export default function Configuracion({ navigation }) {
         ]}
       >
         <Text style={estilos.seccionTitulo}>Soporte</Text>
-        
-        <ConfiguracionItem
-          icono="question-circle"
-          titulo="Ayuda"
-          descripcion="Preguntas frecuentes y guías"
-          tipo="navegacion"
-          onPress={() => Linking.openURL('https://lensegua.com/ayuda')}
-          color="#17a2b8"
-        />
         
         <ConfiguracionItem
           icono="envelope"
@@ -696,7 +659,10 @@ export default function Configuracion({ navigation }) {
           titulo="Cerrar Sesión"
           descripcion="Salir de tu cuenta"
           tipo="navegacion"
-          onPress={cerrarSesion}
+          onPress={async () => {
+  await AsyncStorage.clear();
+  navigation.navigate('Bienvenida');
+}}
           color="#6c757d"
         />
       </Animated.View>

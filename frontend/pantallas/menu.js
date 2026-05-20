@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIn
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://aplicacion-lensegua-backend.onrender.com/api';
 
 export default function Menu({ navigation }) {
   const [userData, setUserData] = useState(null);
@@ -115,6 +115,12 @@ export default function Menu({ navigation }) {
           texto="Lecciones" 
           descripcion="Aprende lengua de señas paso a paso"
           onPress={() => navigation.navigate('Listalecciones')} 
+        />
+        <BotonMenu 
+          icono="gamepad" 
+          texto="Ejercicios" 
+          descripcion="Practica ejercicios directamente"
+          onPress={() => navigation.navigate('ListaEjercicios')} 
         />
         <BotonMenu 
           icono="bar-chart" 

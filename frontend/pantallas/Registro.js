@@ -17,7 +17,7 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://aplicacion-lensegua-backend.onrender.com/api';
 
 export default function Registro({ navigation }) {
   const [correo, setCorreo] = useState('');

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { Video } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://aplicacion-lensegua-backend.onrender.com/api';
 
 export default function ContenidoLecciones({ route, navigation }) {
   const { leccion } = route.params;
@@ -56,8 +57,8 @@ export default function ContenidoLecciones({ route, navigation }) {
   const completarLeccion = () => {
     // Mostrar mensaje de finalización y opción de ir a ejercicios
     Alert.alert(
-      '¡Contenido completado! 📚',
-      `Has terminado de revisar todo el contenido de "${leccion.Nombre}".\n\nAhora puedes practicar con los ejercicios para finalizar completamente esta lección.`,
+      '¡Contenido completado! ',
+      'Has terminado de revisar todo el contenido de "${leccion.Nombre}".\n\nAhora puedes practicar con los ejercicios para finalizar completamente esta lección.',
       [
         {
           text: 'Ir a ejercicios',
@@ -86,14 +87,14 @@ export default function ContenidoLecciones({ route, navigation }) {
   // Función para obtener el nombre de la siguiente lección
   const getNombreSiguienteLeccion = (id) => {
     const nombresLecciones = {
-      2: 'Números Básicos',
-      3: 'Expresiones de Cortesía',
-      4: 'Colores Básicos',
-      5: 'Familia Principal',
+      2: 'Frases de Cortesía',
+      3: 'Familia Principal',
+      4: 'Pronombres Personales Básicos',
+      5: 'Colores Básicos',
       6: 'Lugares Comunes',
-      7: 'Frutas Básicas',
-      8: 'Verduras Básicas',
-      9: 'Días Básicos'
+      7: 'Días de la Semana',
+      8: 'Números Básicos',
+      9: 'Verduras Básicas'
     };
     return nombresLecciones[id] || 'Siguiente Lección';
   };
@@ -101,14 +102,14 @@ export default function ContenidoLecciones({ route, navigation }) {
   // Función para obtener la descripción de la siguiente lección
   const getDescripcionSiguienteLeccion = (id) => {
     const descripcionesLecciones = {
-      2: 'Números del 0 al 15 en lengua de señas',
-      3: 'Saludos y expresiones básicas de cortesía',
-      4: 'Aprende los colores básicos en lengua de señas',
-      5: 'Términos familiares básicos en lengua de señas',
+      2: 'Saludos y expresiones básicas de cortesía',
+      3: 'Términos familiares básicos en lengua de señas',
+      4: 'Algunos pronombres personales en lengua de señas',
+      5: 'Aprende los colores básicos en lengua de señas',
       6: 'Nombres de lugares básicos en lengua de señas',
-      7: 'Frutas comunes y básicas en lengua de señas',
-      8: 'Verduras básicas en lengua de señas',
-      9: 'Los días de la semana en lengua de señas'
+      7: 'Los días de la semana en lengua de señas',
+      8: 'Números del 0 al 15 en lengua de señas',
+      9: 'Verduras básicas en lengua de señas'
     };
     return descripcionesLecciones[id] || 'Continúa aprendiendo más contenido';
   };
@@ -184,11 +185,22 @@ export default function ContenidoLecciones({ route, navigation }) {
           <Text style={estilos.descripcion}>{itemActual.Descripcion}</Text>
           
           {itemActual.Imagen && (
-            <Image 
-              source={{ uri: itemActual.Imagen }} 
-              style={estilos.imagenContenido}
-              resizeMode="contain"
-            />
+            itemActual.Imagen.toLowerCase().endsWith('.mp4') || itemActual.Imagen.toLowerCase().endsWith('.mov') ? (
+              <Video
+                source={{ uri: itemActual.Imagen }}
+                style={estilos.imagenContenido}
+                resizeMode="contain"
+                shouldPlay
+                isLooping
+                useNativeControls={false}
+              />
+            ) : (
+              <Image 
+                source={{ uri: itemActual.Imagen }} 
+                style={estilos.imagenContenido}
+                resizeMode="contain"
+              />
+            )
           )}
 
           {/* Información adicional */}
@@ -310,11 +322,12 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
+  /*estilo imagen*/
   imagenContenido: {
-    width: 250,
+    width: '100%',
     height: 250,
-    borderRadius: 8,
-    marginBottom: 20,
+    borderRadius: 12,
+    alignSelf: 'center',
   },
   infoContainer: {
     width: '100%',
