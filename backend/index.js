@@ -796,7 +796,7 @@ app.get('/reset-password', (req, res) => {
     <body>
       <div class="container">
         <h2>Nueva Contraseña</h2>
-        <form id="resetForm">
+        <form id="resetForm" onsubmit="event.preventDefault();">
           <input type="password" id="password" placeholder="Nueva contraseña (mín. 8 caracteres)" required>
           <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
           <button type="submit" id="submitBtn">Cambiar Contraseña</button>
@@ -804,12 +804,12 @@ app.get('/reset-password', (req, res) => {
         </form>
       </div>
       <script>
-        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+        document.getElementById('resetForm').addEventListener('submit', function (e) {
           e.preventDefault();
-          const password = document.getElementById('password').value;
-          const confirmPassword = document.getElementById('confirmPassword').value;
-          const msgDiv = document.getElementById('message');
-          const btn = document.getElementById('submitBtn');
+          var password = document.getElementById('password').value;
+          var confirmPassword = document.getElementById('confirmPassword').value;
+          var msgDiv = document.getElementById('message');
+          var btn = document.getElementById('submitBtn');
           
           if(password.length < 8) {
             msgDiv.textContent = 'La contraseña debe tener al menos 8 caracteres.';
@@ -820,36 +820,37 @@ app.get('/reset-password', (req, res) => {
             return;
           }
           
-          const token = new URLSearchParams(window.location.search).get('token');
+          var token = new URLSearchParams(window.location.search).get('token');
           
           btn.disabled = true;
           btn.textContent = 'Guardando...';
           msgDiv.textContent = '';
           
-          try {
-            const response = await fetch('/api/reset-password-web', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ token, newPassword: password })
+          fetch('/api/reset-password-web', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: token, newPassword: password })
+          })
+          .then(function(response) {
+            return response.json().then(function(data) {
+              if(response.ok) {
+                msgDiv.className = 'message success';
+                msgDiv.innerHTML = '¡Contraseña actualizada con éxito!<br><br>Ya puedes cerrar esta ventana y volver a LENSEGUA para iniciar sesión.';
+                document.getElementById('resetForm').style.display = 'none';
+              } else {
+                msgDiv.className = 'message';
+                msgDiv.textContent = data.error || 'Hubo un error al restablecer la contraseña.';
+                btn.disabled = false;
+                btn.textContent = 'Cambiar Contraseña';
+              }
             });
-            const data = await response.json();
-            
-            if(response.ok) {
-              msgDiv.className = 'message success';
-              msgDiv.innerHTML = '¡Contraseña actualizada con éxito!<br><br>Ya puedes cerrar esta ventana y volver a LENSEGUA para iniciar sesión.';
-              document.getElementById('resetForm').style.display = 'none';
-            } else {
-              msgDiv.className = 'message';
-              msgDiv.textContent = data.error || 'Hubo un error al restablecer la contraseña.';
-              btn.disabled = false;
-              btn.textContent = 'Cambiar Contraseña';
-            }
-          } catch (err) {
+          })
+          .catch(function(err) {
             msgDiv.className = 'message';
             msgDiv.textContent = 'Error de conexión con el servidor.';
             btn.disabled = false;
             btn.textContent = 'Cambiar Contraseña';
-          }
+          });
         });
       </script>
     </body>
