@@ -16,7 +16,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://aplicacion-lensegua-backend.onrender.com/api';
 
 export default function InicioSesion({ navigation }) {
   const [usuario, setUsuario] = useState('');
@@ -24,6 +24,8 @@ export default function InicioSesion({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
   const [personajeAnimado, setPersonajeAnimado] = useState('normal');
+  const [mostrarRecuperar, setMostrarRecuperar] = useState(false);
+  const [correoRecuperacion, setCorreoRecuperacion] = useState('');
 
   // Animaciones
   const fadeAnim = new Animated.Value(1);
@@ -107,47 +109,46 @@ export default function InicioSesion({ navigation }) {
     }
   };
 
-  const recuperarPassword = async () => {
-    Alert.prompt(
-      'Recuperar contraseña',
-      'Ingresa tu correo electrónico para recibir instrucciones de recuperación:',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Enviar', 
-          onPress: async (correo) => {
-            if (!correo || !correo.trim()) {
-              Alert.alert('Error', 'Por favor ingresa un correo válido');
-              return;
-            }
+  const recuperarPassword = () => {
+    setMostrarRecuperar(true);
+  };
 
-            try {
-              const response = await fetch(`${API_BASE_URL}/recuperar-password`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ correo: correo.trim() }),
-              });
+  const enviarRecuperacion = async () => {
+    if (!correoRecuperacion.trim()) {
+      Alert.alert('Error', 'Por favor ingresa un correo válido.');
+      return;
+    }
 
-              const data = await response.json();
+    setLoading(true);
+    setPersonajeAnimado('pensando');
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/recuperar-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ correo: correoRecuperacion.trim() }),
+      });
 
-              if (response.ok) {
-                Alert.alert('Correo enviado', 'Revisa tu correo para las instrucciones de recuperación');
-              } else {
-                Alert.alert('Error', data.error || 'Error al enviar correo');
-              }
-            } catch (error) {
-              console.error('Error:', error);
-              Alert.alert('Error', 'Error de conexión');
-            }
-          }
-        }
-      ],
-      'plain-text',
-      '',
-      'email-address'
-    );
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Correo enviado', 'Revisa tu correo para las instrucciones de recuperación.');
+        setMostrarRecuperar(false);
+        setCorreoRecuperacion('');
+        setPersonajeAnimado('feliz');
+      } else {
+        setPersonajeAnimado('triste');
+        Alert.alert('Error', data.error || 'Error al enviar correo.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setPersonajeAnimado('triste');
+      Alert.alert('Error', 'Error de conexión.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getPersonajeImage = () => {
@@ -192,88 +193,141 @@ export default function InicioSesion({ navigation }) {
           </Text>
         </Animated.View>
 
-        {/* Formulario de login */}
+        {/* Formulario de login o recuperación */}
         <View style={estilos.formulario}>
-          <Text style={estilos.titulo}>Iniciar Sesión</Text>
-          
-          <View style={estilos.campoContainer}>
-            <View style={estilos.campoConIcono}>
-              <FontAwesome name="user" size={20} color="#023047" style={estilos.icono} />
-              <TextInput
-                placeholder="Nombre de usuario"
-                value={usuario}
-                onChangeText={setUsuario}
-                style={estilos.input}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onFocus={() => setPersonajeAnimado('pensando')}
-                onBlur={() => setPersonajeAnimado('normal')}
-              />
-            </View>
-          </View>
+          {!mostrarRecuperar ? (
+            <>
+              <Text style={estilos.titulo}>Iniciar Sesión</Text>
+              
+              <View style={estilos.campoContainer}>
+                <View style={estilos.campoConIcono}>
+                  <FontAwesome name="user" size={20} color="#023047" style={estilos.icono} />
+                  <TextInput
+                    placeholder="Nombre de usuario"
+                    value={usuario}
+                    onChangeText={setUsuario}
+                    style={estilos.input}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onFocus={() => setPersonajeAnimado('pensando')}
+                    onBlur={() => setPersonajeAnimado('normal')}
+                  />
+                </View>
+              </View>
 
-          <View style={estilos.campoContainer}>
-            <View style={estilos.campoConIcono}>
-              <FontAwesome name="lock" size={20} color="#023047" style={estilos.icono} />
-              <TextInput
-                placeholder="Contraseña"
-                value={contrasena}
-                onChangeText={setContrasena}
-                style={estilos.input}
-                secureTextEntry={!mostrarContrasena}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onFocus={() => setPersonajeAnimado('pensando')}
-                onBlur={() => setPersonajeAnimado('normal')}
-              />
-              <TouchableOpacity 
-                onPress={() => setMostrarContrasena(!mostrarContrasena)}
-                style={estilos.eyeIcon}
-              >
-                <FontAwesome 
-                  name={mostrarContrasena ? "eye-slash" : "eye"} 
-                  size={20} 
-                  color="#023047" 
-                />
+              <View style={estilos.campoContainer}>
+                <View style={estilos.campoConIcono}>
+                  <FontAwesome name="lock" size={20} color="#023047" style={estilos.icono} />
+                  <TextInput
+                    placeholder="Contraseña"
+                    value={contrasena}
+                    onChangeText={setContrasena}
+                    style={estilos.input}
+                    secureTextEntry={!mostrarContrasena}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onFocus={() => setPersonajeAnimado('pensando')}
+                    onBlur={() => setPersonajeAnimado('normal')}
+                  />
+                  <TouchableOpacity 
+                    onPress={() => setMostrarContrasena(!mostrarContrasena)}
+                    style={estilos.eyeIcon}
+                  >
+                    <FontAwesome 
+                      name={mostrarContrasena ? "eye-slash" : "eye"} 
+                      size={20} 
+                      color="#023047" 
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Botón de recuperar contraseña */}
+              <TouchableOpacity onPress={recuperarPassword} style={estilos.linkContainer}>
+                <Text style={estilos.linkTexto}>¿Olvidaste tu contraseña?</Text>
               </TouchableOpacity>
-            </View>
-          </View>
 
-          {/* Botón de recuperar contraseña */}
-          <TouchableOpacity onPress={recuperarPassword} style={estilos.linkContainer}>
-            <Text style={estilos.linkTexto}>¿Olvidaste tu contraseña?</Text>
-          </TouchableOpacity>
+              {/* Botón de login */}
+              <TouchableOpacity 
+                style={[estilos.botonLogin, loading && estilos.botonDeshabilitado]} 
+                onPress={iniciarSesion}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <>
+                    <FontAwesome name="sign-in" size={20} color="#fff" style={estilos.botonIcono} />
+                    <Text style={estilos.botonTexto}>Iniciar Sesión</Text>
+                  </>
+                )}
+              </TouchableOpacity>
 
-          {/* Botón de login */}
-          <TouchableOpacity 
-            style={[estilos.botonLogin, loading && estilos.botonDeshabilitado]} 
-            onPress={iniciarSesion}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <>
-                <FontAwesome name="sign-in" size={20} color="#fff" style={estilos.botonIcono} />
-                <Text style={estilos.botonTexto}>Iniciar Sesión</Text>
-              </>
-            )}
-          </TouchableOpacity>
+              {/* Divider */}
+              <View style={estilos.divider}>
+                <View style={estilos.dividerLine} />
+                <Text style={estilos.dividerTexto}>o</Text>
+                <View style={estilos.dividerLine} />
+              </View>
 
-          {/* Divider */}
-          <View style={estilos.divider}>
-            <View style={estilos.dividerLine} />
-            <Text style={estilos.dividerTexto}>o</Text>
-            <View style={estilos.dividerLine} />
-          </View>
+              {/* Botón de registro */}
+              <TouchableOpacity 
+                style={estilos.botonRegistro} 
+                onPress={() => navigation.navigate('Registro')}
+              >
+                <Text style={estilos.botonRegistroTexto}>¿No tienes cuenta? Regístrate</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={estilos.titulo}>Recuperar Contraseña</Text>
+              <Text style={estilos.descripcionRecuperar}>
+                Ingresa tu correo electrónico para recibir instrucciones de recuperación:
+              </Text>
+              
+              <View style={estilos.campoContainer}>
+                <View style={estilos.campoConIcono}>
+                  <FontAwesome name="envelope" size={20} color="#023047" style={estilos.icono} />
+                  <TextInput
+                    placeholder="Correo electrónico"
+                    value={correoRecuperacion}
+                    onChangeText={setCorreoRecuperacion}
+                    style={estilos.input}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
+              </View>
 
-          {/* Botón de registro */}
-          <TouchableOpacity 
-            style={estilos.botonRegistro} 
-            onPress={() => navigation.navigate('Registro')}
-          >
-            <Text style={estilos.botonRegistroTexto}>¿No tienes cuenta? Regístrate</Text>
-          </TouchableOpacity>
+              {/* Botón de enviar recuperación */}
+              <TouchableOpacity 
+                style={[estilos.botonLogin, loading && estilos.botonDeshabilitado]} 
+                onPress={enviarRecuperacion}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <>
+                    <FontAwesome name="paper-plane" size={18} color="#fff" style={estilos.botonIcono} />
+                    <Text style={estilos.botonTexto}>Enviar instrucciones</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {/* Botón de volver */}
+              <TouchableOpacity 
+                style={estilos.botonRegistro} 
+                onPress={() => {
+                  setMostrarRecuperar(false);
+                  setCorreoRecuperacion('');
+                }}
+              >
+                <Text style={estilos.botonRegistroTexto}>Volver al inicio de sesión</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -426,5 +480,12 @@ const estilos = StyleSheet.create({
     color: '#219ebc',
     fontSize: 16,
     fontWeight: '500',
+  },
+  descripcionRecuperar: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
   },
 });

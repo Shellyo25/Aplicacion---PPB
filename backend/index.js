@@ -913,7 +913,7 @@ app.get('/api/admin/estadisticas', authenticateToken, requireAdmin, async (req, 
   try {
     const [totalUsuarios] = await pool.execute('SELECT COUNT(*) as total FROM Tbl_usuarios');
     
-    const [usuariosActivos] = await pool.execute('SELECT COUNT(*) as total FROM Tbl_usuarios WHERE Estado = "activo"');
+    const [usuariosActivos] = await pool.execute("SELECT COUNT(*) as total FROM Tbl_usuarios WHERE Estado = 'activo'");
     
     const [totalLecciones] = await pool.execute('SELECT COUNT(*) as total FROM Tbl_lecciones');
     
