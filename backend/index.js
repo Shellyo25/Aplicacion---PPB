@@ -727,8 +727,8 @@ app.post('/api/recuperar-password', async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    const protocol = req.protocol === 'https' ? 'https' : 'http';
     const host = req.get('host');
+    const protocol = host.includes('localhost') ? 'http' : 'https';
     const resetLink = `${protocol}://${host}/reset-password?token=${resetToken}`;
 
     if (process.env.BREVO_API_KEY) {
