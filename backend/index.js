@@ -51,31 +51,49 @@ const pool = mysql.createPool(dbConfig);
   }
 })();
 
-let transporter = null;
-if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-  transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+const enviarCorreoBrevo = async (toEmail, toName, subject, htmlContent) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.log('⚠️ API key de Brevo no configurada - correo no enviado');
+    return null;
+  }
+
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: 'LENSEGUA',
+          email: 'lenseguagt@gmail.com'
+        },
+        to: [
+          {
+            email: toEmail,
+            name: toName || toEmail
+          }
+        ],
+        subject: subject,
+        htmlContent: htmlContent
+      })
+    });
+
+    const responseData = await response.json();
+    if (!response.ok) {
+      throw new Error(responseData.message || 'Error al enviar correo desde Brevo');
     }
-  });
-  
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error('Error en configuración de correo:', error);
-      console.log('Para solucionarlo:');
-      console.log('1. Ve a https://myaccount.google.com/apppasswords');
-      console.log('2. Genera una contraseña de aplicación para "Correo"');
-      console.log('3. Actualiza EMAIL_PASS en el archivo .env');
-      console.log('4. Reinicia el servidor');
-    } else {
-      console.log('Servidor de correo configurado correctamente');
-    }
-  });
-} else {
-  console.log('Variables de correo no configuradas en .env');
-}
+
+    console.log('✅ Correo enviado exitosamente via Brevo HTTP API a:', toEmail);
+    return responseData;
+  } catch (err) {
+    console.error('❌ Error en enviarCorreoBrevo:', err);
+    throw err;
+  }
+};
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -402,24 +420,14 @@ app.post('/api/registro', async (req, res) => {
       [nombre, apellido, usuario, correo, hashedPassword, 'usuario', 'activo']
     );
 
-    if (transporter) {
-      const mailOptions = {
-        from: {
-          name: 'LENSEGUA - Aprende Lengua de Señas',
-          address: process.env.EMAIL_USER
-        },
-        to: correo,
-        subject: '¡Bienvenido a LENSEGUA! Tu cuenta ha sido creada exitosamente',
-        html: generarHTMLConfirmacion(`${nombre} ${apellido}`)
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error('Error al enviar correo:', error);
-        } else {
-          console.log('Correo de bienvenida enviado exitosamente a:', correo);
-          console.log('Message ID:', info.messageId);
-        }
+    if (process.env.BREVO_API_KEY) {
+      enviarCorreoBrevo(
+        correo,
+        `${nombre} ${apellido}`,
+        '¡Bienvenido a LENSEGUA! Tu cuenta ha sido creada exitosamente',
+        generarHTMLConfirmacion(`${nombre} ${apellido}`)
+      ).catch(error => {
+        console.error('Error al enviar correo de bienvenida:', error);
       });
     } else {
       console.log('Correo no configurado - usuario registrado sin notificación por email');
@@ -428,8 +436,8 @@ app.post('/api/registro', async (req, res) => {
     res.status(201).json({ 
       message: 'Usuario registrado exitosamente',
       userId: result.insertId,
-      emailSent: transporter ? true : false,
-      emailMessage: transporter ? 'Se ha enviado un correo de bienvenida a tu email' : 'Correo no configurado'
+      emailSent: process.env.BREVO_API_KEY ? true : false,
+      emailMessage: process.env.BREVO_API_KEY ? 'Se ha enviado un correo de bienvenida a tu email' : 'Correo no configurado'
     });
 
   } catch (error) {
@@ -723,38 +731,32 @@ app.post('/api/recuperar-password', async (req, res) => {
     const host = req.get('host');
     const resetLink = `${protocol}://${host}/reset-password?token=${resetToken}`;
 
-    if (transporter) {
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: correo,
-        subject: 'Recuperación de contraseña - LENSEGUA',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-            <h2 style="color: #023047; text-align: center;">Recuperación de contraseña</h2>
-            <p>Hola <strong>${user.Nombre}</strong>,</p>
-            <p>Has solicitado recuperar tu contraseña. Haz clic en el siguiente botón para crear una nueva contraseña:</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${resetLink}" style="background-color: #fb8500; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Restablecer contraseña</a>
-            </div>
-            <p style="color: #666;">O copia y pega este enlace en tu navegador:</p>
-            <p style="color: #666; font-size: 12px; word-break: break-all;">${resetLink}</p>
-            <p style="color: #d9534f; font-size: 14px;">Este enlace expirará en 1 hora.</p>
-            <p style="font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo sin ningún problema.</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-            <p style="text-align: center; color: #888; font-size: 12px;">El equipo de LENSEGUA</p>
+    if (process.env.BREVO_API_KEY) {
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #023047; text-align: center;">Recuperación de contraseña</h2>
+          <p>Hola <strong>${user.Nombre}</strong>,</p>
+          <p>Has solicitado recuperar tu contraseña. Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" style="background-color: #fb8500; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Restablecer contraseña</a>
           </div>
-        `
-      };
+          <p style="color: #666;">O copia y pega este enlace en tu navegador:</p>
+          <p style="color: #666; font-size: 12px; word-break: break-all;">${resetLink}</p>
+          <p style="color: #d9534f; font-size: 14px;">Este enlace expirará en 1 hora.</p>
+          <p style="font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo sin ningún problema.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="text-align: center; color: #888; font-size: 12px;">El equipo de LENSEGUA</p>
+        </div>
+      `;
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error('Error al enviar correo:', error);
-          return res.status(500).json({ error: `Error al enviar correo: ${error.message}` });
-        } else {
-          console.log('Correo de recuperación enviado exitosamente');
-          res.json({ message: 'Correo de recuperación enviado' });
-        }
-      });
+      try {
+        await enviarCorreoBrevo(correo, user.Nombre, 'Recuperación de contraseña - LENSEGUA', htmlContent);
+        console.log('Correo de recuperación enviado exitosamente');
+        res.json({ message: 'Correo de recuperación enviado' });
+      } catch (err) {
+        console.error('Error al enviar correo:', err);
+        return res.status(500).json({ error: `Error al enviar correo: ${err.message}` });
+      }
     } else {
       res.status(503).json({ error: 'Servicio de correo no disponible' });
     }
@@ -1125,7 +1127,7 @@ app.post('/api/soporte', authenticateToken, async (req, res) => {
 
     const user = users[0];
 
-    if (transporter) {
+    if (process.env.BREVO_API_KEY) {
       const tiposSoporte = {
         'soporte': '🔧 Soporte Técnico',
         'bug': '🐛 Reporte de Bug',
@@ -1133,76 +1135,66 @@ app.post('/api/soporte', authenticateToken, async (req, res) => {
         'general': '❓ Consulta General'
       };
 
-      const mailOptions = {
-        from: {
-          name: 'LENSEGUA - Sistema de Soporte',
-          address: process.env.EMAIL_USER
-        },
-        to: 'lenseguagt@gmail.com',
-        subject: `${tiposSoporte[tipo] || tipo} - ${asunto}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #219ebc 0%, #023047 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-              <h1 style="margin: 0; font-size: 24px;">📞 Nuevo Mensaje de Soporte</h1>
-              <p style="margin: 10px 0 0 0; opacity: 0.9;">LENSEGUA - Sistema de Soporte</p>
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #219ebc 0%, #023047 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+            <h1 style="margin: 0; font-size: 24px;">📞 Nuevo Mensaje de Soporte</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">LENSEGUA - Sistema de Soporte</p>
+          </div>
+          
+          <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #023047; margin-top: 0;">Información del Usuario</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold; width: 120px;">Nombre:</td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Nombre} ${user.Apellido}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Usuario:</td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Usuario}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Correo}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Fecha:</td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${new Date().toLocaleString('es-GT')}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Tipo:</td>
+                <td style="padding: 8px 0;">${tiposSoporte[tipo] || tipo}</td>
+              </tr>
+            </table>
+            
+            <h2 style="color: #023047; margin-top: 30px;">Mensaje</h2>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #219ebc;">
+              <h3 style="margin: 0 0 10px 0; color: #023047;">${asunto}</h3>
+              <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${mensaje}</p>
             </div>
             
-            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-              <h2 style="color: #023047; margin-top: 0;">Información del Usuario</h2>
-              <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold; width: 120px;">Nombre:</td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Nombre} ${user.Apellido}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Usuario:</td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Usuario}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${user.Correo}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Fecha:</td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${new Date().toLocaleString('es-GT')}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; font-weight: bold;">Tipo:</td>
-                  <td style="padding: 8px 0;">${tiposSoporte[tipo] || tipo}</td>
-                </tr>
-              </table>
-              
-              <h2 style="color: #023047; margin-top: 30px;">Mensaje</h2>
-              <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #219ebc;">
-                <h3 style="margin: 0 0 10px 0; color: #023047;">${asunto}</h3>
-                <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${mensaje}</p>
-              </div>
-              
-              <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 8px; text-align: center;">
-                <p style="margin: 0; color: #1565c0; font-weight: bold;">
-                  📧 Responde directamente a: ${user.Correo}
-                </p>
-              </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
-              <p>Este mensaje fue enviado desde el sistema de soporte de LENSEGUA</p>
-              <p>Fecha: ${new Date().toLocaleString('es-GT')}</p>
+            <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 8px; text-align: center;">
+              <p style="margin: 0; color: #1565c0; font-weight: bold;">
+                📧 Responde directamente a: ${user.Correo}
+              </p>
             </div>
           </div>
-        `
-      };
+          
+          <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+            <p>Este mensaje fue enviado desde el sistema de soporte de LENSEGUA</p>
+            <p>Fecha: ${new Date().toLocaleString('es-GT')}</p>
+          </div>
+        </div>
+      `;
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error('Error al enviar correo de soporte:', error);
-          return res.status(500).json({ error: `Error al enviar el mensaje: ${error.message}` });
-        } else {
-          console.log('Correo de soporte enviado exitosamente a lenseguagt@gmail.com');
-          console.log('Message ID:', info.messageId);
-          res.json({ message: 'Mensaje enviado exitosamente' });
-        }
-      });
+      try {
+        await enviarCorreoBrevo('lenseguagt@gmail.com', 'Soporte LENSEGUA', `${tiposSoporte[tipo] || tipo} - ${asunto}`, htmlContent);
+        console.log('Correo de soporte enviado exitosamente a lenseguagt@gmail.com');
+        res.json({ message: 'Mensaje enviado exitosamente' });
+      } catch (err) {
+        console.error('Error al enviar correo de soporte:', err);
+        return res.status(500).json({ error: `Error al enviar el mensaje: ${err.message}` });
+      }
     } else {
       res.status(503).json({ error: 'Servicio de correo no disponible' });
     }
