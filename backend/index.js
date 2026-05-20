@@ -54,15 +54,10 @@ const pool = mysql.createPool(dbConfig);
 let transporter = null;
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true para 465, false para otros puertos
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
-    },
-    tls: {
-      rejectUnauthorized: false
     }
   });
   
@@ -754,7 +749,7 @@ app.post('/api/recuperar-password', async (req, res) => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error('Error al enviar correo:', error);
-          return res.status(500).json({ error: 'Error al enviar correo' });
+          return res.status(500).json({ error: `Error al enviar correo: ${error.message}` });
         } else {
           console.log('Correo de recuperación enviado exitosamente');
           res.json({ message: 'Correo de recuperación enviado' });
@@ -1201,7 +1196,7 @@ app.post('/api/soporte', authenticateToken, async (req, res) => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error('Error al enviar correo de soporte:', error);
-          return res.status(500).json({ error: 'Error al enviar el mensaje' });
+          return res.status(500).json({ error: `Error al enviar el mensaje: ${error.message}` });
         } else {
           console.log('Correo de soporte enviado exitosamente a lenseguagt@gmail.com');
           console.log('Message ID:', info.messageId);
