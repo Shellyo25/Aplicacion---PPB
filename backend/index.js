@@ -17,7 +17,7 @@ app.use(express.json());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100 // máximo 100 requests por IP
+  max: 5000 // Aumentado a 5000 para evitar bloqueos en redes compartidas (WiFi de la universidad)
 });
 app.use(limiter);
 
