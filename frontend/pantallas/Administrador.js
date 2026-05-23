@@ -27,6 +27,7 @@ export default function Administrador({ route, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [nuevoRol, setNuevoRol] = useState('usuario');
+  const [expandedStudents, setExpandedStudents] = useState({});
 
   useEffect(() => {
     cargarDatos();
@@ -292,29 +293,122 @@ export default function Administrador({ route, navigation }) {
     </View>
   );
 
-  const renderProgreso = () => (
-    <View style={estilos.seccion}>
-      <Text style={estilos.tituloSeccion}>Progreso de Usuarios</Text>
-      
-      {progreso.map((item, index) => (
-        <View key={index} style={estilos.progresoCard}>
-          <View style={estilos.progresoInfo}>
-            <Text style={estilos.progresoUsuario}>{item.Nombre} (@{item.Usuario})</Text>
-            <Text style={estilos.progresoLeccion}>{item.leccion_nombre}</Text>
-            <View style={estilos.progresoBarra}>
-              <View 
-                style={[
-                  estilos.progresoProgreso, 
-                  { width: `${item.Porcen_Av}%` }
-                ]} 
-              />
-            </View>
-            <Text style={estilos.progresoPorcentaje}>{item.Porcen_Av}%</Text>
-          </View>
-        </View>
-      ))}
-    </View>
-  );
+  const toggleExpand = (usuario) => {
+    setExpandedStudents(prev => ({
+      ...prev,
+      [usuario]: !prev[usuario]
+    }));
+  };
+
+  const renderProgreso = () => {
+    // Agrupar progreso por estudiante
+    const progresoAgrupado = progreso.reduce((acc, item) => {
+      const key = item.Usuario;
+      if (!acc[key]) {
+        acc[key] = {
+          nombre: item.Nombre,
+          usuario: item.Usuario,
+          lecciones: []
+        };
+      }
+      acc[key].lecciones.push({
+        leccion: item.leccion_nombre,
+        porcentaje: parseFloat(item.Porcen_Av || 0)
+      });
+      return acc;
+    }, {});
+
+    const listaProgreso = Object.values(progresoAgrupado);
+
+    return (
+      <View style={estilos.seccion}>
+        <Text style={estilos.tituloSeccion}>Progreso de Usuarios</Text>
+        
+        {listaProgreso.length === 0 ? (
+          <Text style={estilos.textoVacio}>No hay datos de progreso registrados aún.</Text>
+        ) : (
+          listaProgreso.map((estudiante, index) => {
+            const esExpandido = !!expandedStudents[estudiante.usuario];
+            const totalLecciones = estudiante.lecciones.length;
+            const promedioProgreso = Math.round(
+              estudiante.lecciones.reduce((sum, l) => sum + l.porcentaje, 0) / (totalLecciones || 1)
+            );
+
+            return (
+              <View key={index} style={estilos.progresoCardAgrupada}>
+                {/* Cabecera del estudiante (Carpeta) */}
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  onPress={() => toggleExpand(estudiante.usuario)}
+                  style={estilos.carpetaHeader}
+                >
+                  <View style={estilos.carpetaIconoContainer}>
+                    <FontAwesome 
+                      name={esExpandido ? "folder-open" : "folder"} 
+                      size={24} 
+                      color={esExpandido ? "#fb8500" : "#219ebc"} 
+                    />
+                  </View>
+                  <View style={estilos.carpetaInfo}>
+                    <Text style={estilos.progresoUsuario}>{estudiante.nombre}</Text>
+                    <Text style={estilos.progresoUsuarioDetalle}>@{estudiante.usuario} • {totalLecciones} lecciones</Text>
+                  </View>
+                  <View style={estilos.carpetaAccion}>
+                    <FontAwesome 
+                      name={esExpandido ? "chevron-up" : "chevron-down"} 
+                      size={16} 
+                      color="#666" 
+                    />
+                  </View>
+                </TouchableOpacity>
+
+                {/* Barra de progreso promedio general */}
+                <View style={estilos.carpetaProgresoGeneral}>
+                  <View style={estilos.progresoBarra}>
+                    <View 
+                      style={[
+                        estilos.progresoProgresoGeneral, 
+                        { width: `${promedioProgreso}%` }
+                      ]} 
+                    />
+                  </View>
+                  <Text style={estilos.progresoPorcentaje}>{promedioProgreso}% promedio</Text>
+                </View>
+
+                {/* Lista de lecciones adentro (Contenido de la carpeta) */}
+                {esExpandido && (
+                  <View style={estilos.carpetaContenido}>
+                    {estudiante.lecciones.map((l, lIdx) => (
+                      <View key={lIdx} style={estilos.leccionSubCard}>
+                        <View style={estilos.leccionSubCardHeader}>
+                          <FontAwesome 
+                            name={l.porcentaje === 100 ? "check-circle" : "circle-o"} 
+                            size={14} 
+                            color={l.porcentaje === 100 ? "#4CAF50" : "#ffb703"} 
+                            style={{ marginRight: 8 }}
+                          />
+                          <Text style={estilos.leccionSubCardTitulo}>{l.leccion}</Text>
+                          <Text style={estilos.leccionSubCardPorcentaje}>{l.porcentaje}%</Text>
+                        </View>
+                        <View style={estilos.leccionSubBarra}>
+                          <View 
+                            style={[
+                              estilos.leccionSubProgreso, 
+                              { width: `${l.porcentaje}%` }
+                            ]} 
+                          />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })
+        )}
+      </View>
+    );
+  };
 
   return (
     <View style={estilos.contenedor}>
@@ -677,6 +771,89 @@ const estilos = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     textAlign: 'right',
+  },
+  progresoCardAgrupada: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  carpetaHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 10,
+  },
+  carpetaIconoContainer: {
+    marginRight: 12,
+  },
+  carpetaInfo: {
+    flex: 1,
+  },
+  progresoUsuarioDetalle: {
+    fontSize: 12,
+    color: '#666',
+  },
+  carpetaAccion: {
+    padding: 5,
+  },
+  carpetaProgresoGeneral: {
+    borderTopWidth: 1,
+    borderTopColor: '#f1f3f5',
+    paddingTop: 10,
+  },
+  progresoProgresoGeneral: {
+    height: '100%',
+    backgroundColor: '#219ebc',
+    borderRadius: 4,
+  },
+  carpetaContenido: {
+    marginTop: 15,
+    padding: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  leccionSubCard: {
+    marginBottom: 12,
+  },
+  leccionSubCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  leccionSubCardTitulo: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#023047',
+  },
+  leccionSubCardPorcentaje: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#666',
+  },
+  leccionSubBarra: {
+    height: 6,
+    backgroundColor: '#e9ecef',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  leccionSubProgreso: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+    borderRadius: 3,
+  },
+  textoVacio: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 20,
   },
   modalOverlay: {
     flex: 1,
