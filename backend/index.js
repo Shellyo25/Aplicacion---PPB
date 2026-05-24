@@ -11,7 +11,9 @@ const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 app.use(cors());
 app.use(express.json());
 
@@ -51,48 +53,75 @@ const pool = mysql.createPool(dbConfig);
   }
 })();
 
-const enviarCorreoBrevo = async (toEmail, toName, subject, htmlContent) => {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) {
-    console.log('⚠️ API key de Brevo no configurada - correo no enviado');
-    return null;
-  }
+const enviarCorreo = async (toEmail, toName, subject, htmlContent) => {
+  // 1. Intentar primero con Gmail (Nodemailer) si hay credenciales en .env
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    try {
+      console.log('📬 [EMAIL] Intentando enviar correo vía Gmail SMTP (Nodemailer) a:', toEmail);
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
 
-  try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': apiKey,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        sender: {
-          name: 'LENSEGUA',
-          email: 'lenseguagt@gmail.com'
-        },
-        to: [
-          {
-            email: toEmail,
-            name: toName || toEmail
-          }
-        ],
+      const info = await transporter.sendMail({
+        from: `"LENSEGUA" <${process.env.EMAIL_USER}>`,
+        to: toEmail,
         subject: subject,
-        htmlContent: htmlContent
-      })
-    });
+        html: htmlContent
+      });
 
-    const responseData = await response.json();
-    if (!response.ok) {
-      throw new Error(responseData.message || 'Error al enviar correo desde Brevo');
+      console.log('✅ [EMAIL] Correo enviado exitosamente via Gmail SMTP a:', toEmail, info.messageId);
+      return { success: true, provider: 'gmail', messageId: info.messageId };
+    } catch (gmailError) {
+      console.error('❌ [EMAIL] Falló envío por Gmail SMTP, intentando Brevo...', gmailError);
     }
-
-    console.log('✅ Correo enviado exitosamente via Brevo HTTP API a:', toEmail);
-    return responseData;
-  } catch (err) {
-    console.error('❌ Error en enviarCorreoBrevo:', err);
-    throw err;
   }
+
+  // 2. Intentar con Brevo como respaldo si hay API key
+  const apiKey = process.env.BREVO_API_KEY;
+  if (apiKey) {
+    try {
+      console.log('📬 [EMAIL] Intentando enviar correo vía Brevo HTTP API a:', toEmail);
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': apiKey,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: {
+            name: 'LENSEGUA',
+            email: process.env.EMAIL_USER || 'lenseguagt@gmail.com'
+          },
+          to: [
+            {
+              email: toEmail,
+              name: toName || toEmail
+            }
+          ],
+          subject: subject,
+          htmlContent: htmlContent
+        })
+      });
+
+      const responseData = await response.json();
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Error al enviar correo desde Brevo');
+      }
+
+      console.log('✅ [EMAIL] Correo enviado exitosamente via Brevo HTTP API a:', toEmail);
+      return { success: true, provider: 'brevo', data: responseData };
+    } catch (brevoError) {
+      console.error('❌ [EMAIL] Falló envío por Brevo:', brevoError);
+      throw brevoError;
+    }
+  }
+
+  throw new Error('No hay canales de correo configurados (EMAIL_USER/EMAIL_PASS o BREVO_API_KEY faltantes)');
 };
 
 const authenticateToken = (req, res, next) => {
@@ -420,8 +449,10 @@ app.post('/api/registro', async (req, res) => {
       [nombre, apellido, usuario, correo, hashedPassword, 'usuario', 'activo']
     );
 
-    if (process.env.BREVO_API_KEY) {
-      enviarCorreoBrevo(
+    const hasEmailConfig = !!(process.env.EMAIL_USER || process.env.BREVO_API_KEY);
+
+    if (hasEmailConfig) {
+      enviarCorreo(
         correo,
         `${nombre} ${apellido}`,
         '¡Bienvenido a LENSEGUA! Tu cuenta ha sido creada exitosamente',
@@ -436,8 +467,8 @@ app.post('/api/registro', async (req, res) => {
     res.status(201).json({ 
       message: 'Usuario registrado exitosamente',
       userId: result.insertId,
-      emailSent: process.env.BREVO_API_KEY ? true : false,
-      emailMessage: process.env.BREVO_API_KEY ? 'Se ha enviado un correo de bienvenida a tu email' : 'Correo no configurado'
+      emailSent: hasEmailConfig,
+      emailMessage: hasEmailConfig ? 'Se ha enviado un correo de bienvenida a tu email' : 'Correo no configurado'
     });
 
   } catch (error) {
@@ -731,34 +762,30 @@ app.post('/api/recuperar-password', async (req, res) => {
     const protocol = host.includes('localhost') ? 'http' : 'https';
     const resetLink = `${protocol}://${host}/reset-password?token=${resetToken}`;
 
-    if (process.env.BREVO_API_KEY) {
-      const htmlContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-          <h2 style="color: #023047; text-align: center;">Recuperación de contraseña</h2>
-          <p>Hola <strong>${user.Nombre}</strong>,</p>
-          <p>Has solicitado recuperar tu contraseña. Haz clic en el siguiente botón para crear una nueva contraseña:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="background-color: #fb8500; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Restablecer contraseña</a>
-          </div>
-          <p style="color: #666;">O copia y pega este enlace en tu navegador:</p>
-          <p style="color: #666; font-size: 12px; word-break: break-all;">${resetLink}</p>
-          <p style="color: #d9534f; font-size: 14px;">Este enlace expirará en 1 hora.</p>
-          <p style="font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo sin ningún problema.</p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="text-align: center; color: #888; font-size: 12px;">El equipo de LENSEGUA</p>
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <h2 style="color: #023047; text-align: center;">Recuperación de contraseña</h2>
+        <p>Hola <strong>${user.Nombre}</strong>,</p>
+        <p>Has solicitado recuperar tu contraseña. Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="background-color: #fb8500; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Restablecer contraseña</a>
         </div>
-      `;
+        <p style="color: #666;">O copia y pega este enlace en tu navegador:</p>
+        <p style="color: #666; font-size: 12px; word-break: break-all;">${resetLink}</p>
+        <p style="color: #d9534f; font-size: 14px;">Este enlace expirará en 1 hora.</p>
+        <p style="font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo sin ningún problema.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="text-align: center; color: #888; font-size: 12px;">El equipo de LENSEGUA</p>
+      </div>
+    `;
 
-      try {
-        await enviarCorreoBrevo(correo, user.Nombre, 'Recuperación de contraseña - LENSEGUA', htmlContent);
-        console.log('Correo de recuperación enviado exitosamente');
-        res.json({ message: 'Correo de recuperación enviado' });
-      } catch (err) {
-        console.error('Error al enviar correo:', err);
-        return res.status(500).json({ error: `Error al enviar correo: ${err.message}` });
-      }
-    } else {
-      res.status(503).json({ error: 'Servicio de correo no disponible' });
+    try {
+      await enviarCorreo(correo, user.Nombre, 'Recuperación de contraseña - LENSEGUA', htmlContent);
+      console.log('Correo de recuperación enviado exitosamente');
+      res.json({ message: 'Correo de recuperación enviado' });
+    } catch (err) {
+      console.error('Error al enviar correo:', err);
+      return res.status(500).json({ error: `Error al enviar correo: ${err.message}` });
     }
 
   } catch (error) {
@@ -796,15 +823,15 @@ app.get('/reset-password', (req, res) => {
     <body>
       <div class="container">
         <h2>Nueva Contraseña</h2>
-        <form id="resetForm" onsubmit="event.preventDefault();">
+        <div id="resetForm">
           <input type="password" id="password" placeholder="Nueva contraseña (mín. 8 caracteres)" required>
           <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
-          <button type="submit" id="submitBtn">Cambiar Contraseña</button>
+          <button type="button" id="submitBtn">Cambiar Contraseña</button>
           <div id="message" class="message"></div>
-        </form>
+        </div>
       </div>
       <script>
-        document.getElementById('resetForm').addEventListener('submit', function (e) {
+        document.getElementById('submitBtn').addEventListener('click', function (e) {
           e.preventDefault();
           var password = document.getElementById('password').value;
           var confirmPassword = document.getElementById('confirmPassword').value;
