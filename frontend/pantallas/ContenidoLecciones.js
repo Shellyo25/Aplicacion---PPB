@@ -58,7 +58,7 @@ export default function ContenidoLecciones({ route, navigation }) {
     // Mostrar mensaje de finalización y opción de ir a ejercicios
     Alert.alert(
       '¡Contenido completado! ',
-      'Has terminado de revisar todo el contenido de "${leccion.Nombre}".\n\nAhora puedes practicar con los ejercicios para finalizar completamente esta lección.',
+      `Has terminado de revisar todo el contenido de "${leccion.Nombre}".\n\nAhora puedes practicar con los ejercicios para finalizar completamente esta lección.`,
       [
         {
           text: 'Ir a ejercicios',

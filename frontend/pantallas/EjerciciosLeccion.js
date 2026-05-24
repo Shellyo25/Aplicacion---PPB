@@ -760,7 +760,7 @@ export default function EjerciciosLeccion({ route, navigation }) {
   let seniaObjetivo = '';
 
   if (leccionId === 1) {
-    seniaObjetivo = 'K';
+    seniaObjetivo = 'V';
   }
 
   if (leccionId === 2) {

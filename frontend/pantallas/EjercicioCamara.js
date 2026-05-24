@@ -90,11 +90,11 @@ export default function EjercicioCamara({ navigation, route }) {
       setProcesando(true);
       const landmarksSecuencia = [];
 
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         setCapturaPaso(i + 1);
         const foto = await cameraRef.current.takePictureAsync({
           skipProcessing: true,
-          quality: 0.3,
+          quality: 0.15,
           base64: false,
         });
 
@@ -114,7 +114,7 @@ export default function EjercicioCamara({ navigation, route }) {
           landmarksSecuencia.push(null);
         }
 
-        if (i < 2) await new Promise(r => setTimeout(r, 600)); // Espera para capturar el movimiento
+        if (i < 1) await new Promise(r => setTimeout(r, 600)); // Espera para capturar el movimiento
       }
 
       setCapturaPaso(0);
@@ -262,7 +262,7 @@ export default function EjercicioCamara({ navigation, route }) {
       <View style={styles.botonContainer}>
 
         <Button
-          title={procesando ? (capturaPaso > 0 ? `Capturando ${capturaPaso}/3...` : 'Validando...') : 'Empezar Validación (3s)'}
+          title={procesando ? (capturaPaso > 0 ? `Capturando ${capturaPaso}/2...` : 'Validando...') : 'Empezar Validación (2s)'}
           onPress={validarSenia}
           disabled={procesando || cargandoModelo}
         />
