@@ -1216,7 +1216,7 @@ app.post('/api/soporte', authenticateToken, async (req, res) => {
       `;
 
       try {
-        await enviarCorreoBrevo('lenseguagt@gmail.com', 'Soporte LENSEGUA', `${tiposSoporte[tipo] || tipo} - ${asunto}`, htmlContent);
+        await enviarCorreo('lenseguagt@gmail.com', 'Soporte LENSEGUA', `${tiposSoporte[tipo] || tipo} - ${asunto}`, htmlContent);
         console.log('Correo de soporte enviado exitosamente a lenseguagt@gmail.com');
         res.json({ message: 'Mensaje enviado exitosamente' });
       } catch (err) {

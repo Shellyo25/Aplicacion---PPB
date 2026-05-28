@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert, 
-  Image, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
   ActivityIndicator,
   Dimensions,
   ScrollView,
@@ -69,7 +69,7 @@ export default function InicioSesion({ navigation }) {
 
     setLoading(true);
     setPersonajeAnimado('pensando');
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
@@ -89,7 +89,7 @@ export default function InicioSesion({ navigation }) {
         // Guardar token y datos del usuario
         await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(data.user));
-        
+
         setTimeout(() => {
           Alert.alert('¡Bienvenido!', `Hola, ${data.user.nombre}`);
           navigation.navigate('menu');
@@ -121,7 +121,7 @@ export default function InicioSesion({ navigation }) {
 
     setLoading(true);
     setPersonajeAnimado('pensando');
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/recuperar-password`, {
         method: 'POST',
@@ -166,13 +166,13 @@ export default function InicioSesion({ navigation }) {
 
   return (
     <View style={estilos.contenedor}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={estilos.scrollContainer}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Personaje animado */}
-        <Animated.View 
+        <Animated.View
           style={[
             estilos.personajeContainer,
             {
@@ -181,15 +181,15 @@ export default function InicioSesion({ navigation }) {
             }
           ]}
         >
-          <Image 
-            source={{ uri: getPersonajeImage() }} 
-            style={estilos.personaje} 
+          <Image
+            source={{ uri: getPersonajeImage() }}
+            style={estilos.personaje}
           />
           <Text style={estilos.saludoPersonaje}>
             {personajeAnimado === 'feliz' ? '¡Hola! ¡Bienvenido!' :
-             personajeAnimado === 'triste' ? 'Ups... algo salió mal' :
-             personajeAnimado === 'pensando' ? 'Verificando...' :
-             '¡Hola! Inicia sesión para continuar'}
+              personajeAnimado === 'triste' ? 'Ups... algo salió mal' :
+                personajeAnimado === 'pensando' ? 'Verificando...' :
+                  '¡Hola! Inicia sesión para continuar'}
           </Text>
         </Animated.View>
 
@@ -198,7 +198,7 @@ export default function InicioSesion({ navigation }) {
           {!mostrarRecuperar ? (
             <>
               <Text style={estilos.titulo}>Iniciar Sesión</Text>
-              
+
               <View style={estilos.campoContainer}>
                 <View style={estilos.campoConIcono}>
                   <FontAwesome name="user" size={20} color="#023047" style={estilos.icono} />
@@ -229,14 +229,14 @@ export default function InicioSesion({ navigation }) {
                     onFocus={() => setPersonajeAnimado('pensando')}
                     onBlur={() => setPersonajeAnimado('normal')}
                   />
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={() => setMostrarContrasena(!mostrarContrasena)}
                     style={estilos.eyeIcon}
                   >
-                    <FontAwesome 
-                      name={mostrarContrasena ? "eye-slash" : "eye"} 
-                      size={20} 
-                      color="#023047" 
+                    <FontAwesome
+                      name={mostrarContrasena ? "eye-slash" : "eye"}
+                      size={20}
+                      color="#023047"
                     />
                   </TouchableOpacity>
                 </View>
@@ -248,8 +248,8 @@ export default function InicioSesion({ navigation }) {
               </TouchableOpacity>
 
               {/* Botón de login */}
-              <TouchableOpacity 
-                style={[estilos.botonLogin, loading && estilos.botonDeshabilitado]} 
+              <TouchableOpacity
+                style={[estilos.botonLogin, loading && estilos.botonDeshabilitado]}
                 onPress={iniciarSesion}
                 disabled={loading}
               >
@@ -271,8 +271,8 @@ export default function InicioSesion({ navigation }) {
               </View>
 
               {/* Botón de registro */}
-              <TouchableOpacity 
-                style={estilos.botonRegistro} 
+              <TouchableOpacity
+                style={estilos.botonRegistro}
                 onPress={() => navigation.navigate('Registro')}
               >
                 <Text style={estilos.botonRegistroTexto}>¿No tienes cuenta? Regístrate</Text>
@@ -284,7 +284,7 @@ export default function InicioSesion({ navigation }) {
               <Text style={estilos.descripcionRecuperar}>
                 Ingresa tu correo electrónico para recibir instrucciones de recuperación:
               </Text>
-              
+
               <View style={estilos.campoContainer}>
                 <View style={estilos.campoConIcono}>
                   <FontAwesome name="envelope" size={20} color="#023047" style={estilos.icono} />
@@ -301,8 +301,8 @@ export default function InicioSesion({ navigation }) {
               </View>
 
               {/* Botón de enviar recuperación */}
-              <TouchableOpacity 
-                style={[estilos.botonLogin, loading && estilos.botonDeshabilitado]} 
+              <TouchableOpacity
+                style={[estilos.botonLogin, loading && estilos.botonDeshabilitado]}
                 onPress={enviarRecuperacion}
                 disabled={loading}
               >
@@ -317,8 +317,8 @@ export default function InicioSesion({ navigation }) {
               </TouchableOpacity>
 
               {/* Botón de volver */}
-              <TouchableOpacity 
-                style={estilos.botonRegistro} 
+              <TouchableOpacity
+                style={estilos.botonRegistro}
                 onPress={() => {
                   setMostrarRecuperar(false);
                   setCorreoRecuperacion('');

@@ -65,7 +65,7 @@ const esForma = (dedos, forma, landmarks = null) => {
 };
 
 export const validarSeniaEspecifica = (landmarksSecuencia, seniaObjetivo) => {
-    if (!landmarksSecuencia || landmarksSecuencia.length < 2) return false;
+    if (!landmarksSecuencia || landmarksSecuencia.length < 3) return false;
 
     // Convertir landmarks a estados de los dedos y guardar landmarks crudos para geometria avanzada
     const frames = landmarksSecuencia.map(l => {

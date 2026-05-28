@@ -20,6 +20,7 @@ export default function EjercicioCamara({ navigation, route }) {
 
   const [procesando, setProcesando] = useState(false);
   const [capturaPaso, setCapturaPaso] = useState(0);
+  const [cuentaRegresiva, setCuentaRegresiva] = useState(0);
 
   const cameraRef = useRef(null);
 
@@ -88,13 +89,24 @@ export default function EjercicioCamara({ navigation, route }) {
 
     try {
       setProcesando(true);
+
+      // Cuenta regresiva de 3 segundos
+      for (let c = 3; c > 0; c--) {
+        setCuentaRegresiva(c);
+        try {
+          Vibration.vibrate(80); // Vibración breve con cada segundo
+        } catch (e) {}
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      setCuentaRegresiva(0);
+
       const landmarksSecuencia = [];
 
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 3; i++) {
         setCapturaPaso(i + 1);
         const foto = await cameraRef.current.takePictureAsync({
           skipProcessing: true,
-          quality: 0.15,
+          quality: 0.3,
           base64: false,
         });
 
@@ -114,7 +126,7 @@ export default function EjercicioCamara({ navigation, route }) {
           landmarksSecuencia.push(null);
         }
 
-        if (i < 1) await new Promise(r => setTimeout(r, 600)); // Espera para capturar el movimiento
+        if (i < 2) await new Promise(r => setTimeout(r, 600)); // Espera para capturar el movimiento
       }
 
       setCapturaPaso(0);
@@ -237,6 +249,15 @@ export default function EjercicioCamara({ navigation, route }) {
         facing="front"
       />
 
+      {cuentaRegresiva > 0 && (
+        <View style={styles.countdownOverlay}>
+          <View style={styles.countdownBadge}>
+            <Text style={styles.countdownText}>{cuentaRegresiva}</Text>
+          </View>
+          <Text style={styles.countdownSubtext}>¡Prepárate!</Text>
+        </View>
+      )}
+
       <View style={styles.overlay}>
 
         <Text style={styles.titulo}>
@@ -262,7 +283,7 @@ export default function EjercicioCamara({ navigation, route }) {
       <View style={styles.botonContainer}>
 
         <Button
-          title={procesando ? (capturaPaso > 0 ? `Capturando ${capturaPaso}/2...` : 'Validando...') : 'Empezar Validación (2s)'}
+          title={procesando ? (capturaPaso > 0 ? `Capturando ${capturaPaso}/3...` : 'Validando...') : 'Empezar Validación (3s)'}
           onPress={validarSenia}
           disabled={procesando || cargandoModelo}
         />
@@ -355,6 +376,45 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#219ebc',
     fontWeight: 'bold'
+  },
+
+  countdownOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999
+  },
+
+  countdownBadge: {
+    backgroundColor: '#fb8500',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 3,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6
+  },
+
+  countdownText: {
+    color: '#fff',
+    fontSize: 48,
+    fontWeight: 'bold'
+  },
+
+  countdownSubtext: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5
   }
 
 });

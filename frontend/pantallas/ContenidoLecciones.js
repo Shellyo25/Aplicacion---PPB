@@ -19,7 +19,7 @@ export default function ContenidoLecciones({ route, navigation }) {
   const cargarContenido = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      
+
       if (!token) {
         navigation.navigate('InicioSesion');
         return;
@@ -63,17 +63,18 @@ export default function ContenidoLecciones({ route, navigation }) {
         {
           text: 'Ir a ejercicios',
           style: 'default',
-          onPress: () => navigation.navigate('EjerciciosLeccion', { 
+          onPress: () => navigation.navigate('EjerciciosLeccion', {
             leccionId: leccion.Pk_ID_leccion,
-            nombreLeccion: leccion.Nombre 
+            nombreLeccion: leccion.Nombre
           })
         },
         {
           text: 'Volver al menú',
-          style: 'cancel',
+          style: 'default',
           onPress: () => navigation.navigate('Listalecciones')
         }
-      ]
+      ],
+      { cancelable: true }
     );
   };
 
@@ -115,9 +116,9 @@ export default function ContenidoLecciones({ route, navigation }) {
   };
 
   const irAEjercicios = () => {
-    navigation.navigate('EjerciciosLeccion', { 
+    navigation.navigate('EjerciciosLeccion', {
       leccionId: leccion.Pk_ID_leccion,
-      nombreLeccion: leccion.Nombre 
+      nombreLeccion: leccion.Nombre
     });
   };
 
@@ -171,11 +172,11 @@ export default function ContenidoLecciones({ route, navigation }) {
             {indiceActual + 1} de {contenido.length}
           </Text>
           <View style={estilos.barraProgreso}>
-            <View 
+            <View
               style={[
-                estilos.barraProgresoFill, 
+                estilos.barraProgresoFill,
                 { width: `${((indiceActual + 1) / contenido.length) * 100}%` }
-              ]} 
+              ]}
             />
           </View>
         </View>
@@ -183,7 +184,7 @@ export default function ContenidoLecciones({ route, navigation }) {
         {/* Contenido principal */}
         <View style={estilos.contenidoCard}>
           <Text style={estilos.descripcion}>{itemActual.Descripcion}</Text>
-          
+
           {itemActual.Imagen && (
             itemActual.Imagen.toLowerCase().endsWith('.mp4') || itemActual.Imagen.toLowerCase().endsWith('.mov') ? (
               <Video
@@ -195,8 +196,8 @@ export default function ContenidoLecciones({ route, navigation }) {
                 useNativeControls={false}
               />
             ) : (
-              <Image 
-                source={{ uri: itemActual.Imagen }} 
+              <Image
+                source={{ uri: itemActual.Imagen }}
                 style={estilos.imagenContenido}
                 resizeMode="contain"
               />
@@ -216,8 +217,8 @@ export default function ContenidoLecciones({ route, navigation }) {
 
         {/* Botones de navegación */}
         <View style={estilos.botonesContainer}>
-          <TouchableOpacity 
-            style={[estilos.botonNavegacion, indiceActual === 0 && estilos.botonDeshabilitado]} 
+          <TouchableOpacity
+            style={[estilos.botonNavegacion, indiceActual === 0 && estilos.botonDeshabilitado]}
             onPress={contenidoAnterior}
             disabled={indiceActual === 0}
           >
@@ -238,11 +239,11 @@ export default function ContenidoLecciones({ route, navigation }) {
           )}
         </View>
 
-        {/* Botón de ejercicios - Solo visible después de completar la lección */}
+        {/* Botón para volver al menú principal de la app - Solo visible al completar */}
         {indiceActual >= contenido.length - 1 && (
-          <TouchableOpacity style={estilos.botonEjercicios} onPress={irAEjercicios}>
-            <FontAwesome name="pencil" size={20} color="#fff" style={estilos.iconoBoton} />
-            <Text style={estilos.botonEjerciciosTexto}>Practicar con ejercicios</Text>
+          <TouchableOpacity style={estilos.botonEjercicios} onPress={() => navigation.navigate('menu')}>
+            <FontAwesome name="home" size={20} color="#fff" style={estilos.iconoBoton} />
+            <Text style={estilos.botonEjerciciosTexto}>Volver al Menú Principal</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
