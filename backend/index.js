@@ -779,14 +779,12 @@ app.post('/api/recuperar-password', async (req, res) => {
       </div>
     `;
 
-    try {
-      await enviarCorreo(correo, user.Nombre, 'Recuperación de contraseña - LENSEGUA', htmlContent);
-      console.log('Correo de recuperación enviado exitosamente');
-      res.json({ message: 'Correo de recuperación enviado' });
-    } catch (err) {
-      console.error('Error al enviar correo:', err);
-      return res.status(500).json({ error: `Error al enviar correo: ${err.message}` });
-    }
+    // Enviar el correo en segundo plano para no bloquear al usuario (UX súper rápida)
+    enviarCorreo(correo, user.Nombre, 'Recuperación de contraseña - LENSEGUA', htmlContent)
+      .then(() => console.log('✅ Correo de recuperación enviado en segundo plano exitosamente'))
+      .catch(err => console.error('❌ Error al enviar correo de recuperación en segundo plano:', err));
+
+    res.json({ message: 'Correo de recuperación enviado' });
 
   } catch (error) {
     console.error('Error en recuperación:', error);
@@ -1215,14 +1213,12 @@ app.post('/api/soporte', authenticateToken, async (req, res) => {
         </div>
       `;
 
-      try {
-        await enviarCorreo('lenseguagt@gmail.com', 'Soporte LENSEGUA', `${tiposSoporte[tipo] || tipo} - ${asunto}`, htmlContent);
-        console.log('Correo de soporte enviado exitosamente a lenseguagt@gmail.com');
-        res.json({ message: 'Mensaje enviado exitosamente' });
-      } catch (err) {
-        console.error('Error al enviar correo de soporte:', err);
-        return res.status(500).json({ error: `Error al enviar el mensaje: ${err.message}` });
-      }
+      // Enviar el correo de soporte en segundo plano para no bloquear al usuario (UX súper rápida)
+      enviarCorreo('lenseguagt@gmail.com', 'Soporte LENSEGUA', `${tiposSoporte[tipo] || tipo} - ${asunto}`, htmlContent)
+        .then(() => console.log('✅ Correo de soporte enviado en segundo plano exitosamente'))
+        .catch(err => console.error('❌ Error al enviar correo de soporte en segundo plano:', err));
+
+      res.json({ message: 'Mensaje enviado exitosamente' });
     } else {
       res.status(503).json({ error: 'Servicio de correo no disponible' });
     }
